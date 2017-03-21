@@ -19,7 +19,7 @@
 package com.example.bowon.graduationworkdebug.render;
 
 // 카메라 부분을 담당하는 클래스
-public class Camera {
+public class CameraData {
 	
 	// 기본 뷰의 각도
 	public static final float DEFAULT_VIEW_ANGLE = (float) Math.toRadians(45);
@@ -36,12 +36,12 @@ public class Camera {
 	float dist;
 
 	// 기본 생성자. 넓이와 높이를 설정
-	public Camera(int width, int height) {
+	public CameraData(int width, int height) {
 		this(width, height, true);
 	}
 
 	// 생성자. 넓이와 높이, 세팅 상태를 설정
-	public Camera(int width, int height, boolean init) {
+	public CameraData(int width, int height, boolean init) {
 		this.width = width;
 		this.height = height;
 

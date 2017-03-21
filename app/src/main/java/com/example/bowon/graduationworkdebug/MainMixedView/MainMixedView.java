@@ -227,7 +227,7 @@ public class MainMixedView extends AppCompatActivity implements SensorEventListe
 
 
         tempText3.setText("방위 : "+Math.toDegrees(mOrientationAngles[0])+"\n상하경사 : "+Math.toDegrees(mOrientationAngles[1])+"\n좌우경사 : "+Math.toDegrees(mOrientationAngles[2]));
-        tempText3.setBackgroundColor(Color.WHITE);
+        //tempText3.setBackgroundColor(Color.WHITE);
 
     }
 
