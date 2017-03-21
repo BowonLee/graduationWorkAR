@@ -25,7 +25,7 @@ import  android.location.Location;
 // Mixare의 마커 카피
 
 
-abstract public class Marker implements Comparator<Marker>{
+abstract public class Marker implements Comparable<Marker>{
 
     private String ID;	// ID값
     protected String title;	// 타이틀

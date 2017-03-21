@@ -1,4 +1,4 @@
-package com.example.bowon.graduationworkdebug;
+package com.example.bowon.graduationworkdebug.MainMixedView;
 
 import android.content.Context;
 import android.graphics.Camera;

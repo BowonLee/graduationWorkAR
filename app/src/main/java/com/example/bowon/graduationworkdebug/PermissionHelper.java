@@ -17,13 +17,13 @@ import android.util.Log;
 public class PermissionHelper {
 
 
-    static final int LOCATION_ACCESS__FINE = 1; // 위치정보 퍼미션
-    static final int CAMERA_PERMISSION = 2;
+    public static final int LOCATION_ACCESS__FINE = 1; // 위치정보 퍼미션
+    public static final int CAMERA_PERMISSION = 2;
 
     Context currentActivity;
     int permissionCheck;
 
-    PermissionHelper(Context activity){
+    public PermissionHelper(Context activity){
         this.currentActivity = activity;
 
     }

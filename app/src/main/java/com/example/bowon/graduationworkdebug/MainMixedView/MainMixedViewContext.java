@@ -1,4 +1,4 @@
-package com.example.bowon.graduationworkdebug;
+package com.example.bowon.graduationworkdebug.MainMixedView;
 
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -27,6 +27,9 @@ public class MainMixedViewContext extends ContextWrapper {
        this.context = context;
         mainMixedView = (MainMixedView)context;
     }
+
+
+
 
 
 

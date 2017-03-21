@@ -1,4 +1,4 @@
-package com.example.bowon.graduationworkdebug;
+package com.example.bowon.graduationworkdebug.MainMixedView;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -16,13 +16,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.TextureView;
-import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.example.bowon.graduationworkdebug.AugmentedView;
 import com.example.bowon.graduationworkdebug.Datatype.LocationCoordinate;
-import com.example.bowon.graduationworkdebug.DeviceLocationPackage.LocationHelper;
+import com.example.bowon.graduationworkdebug.GetAddress;
+import com.example.bowon.graduationworkdebug.PermissionHelper;
+import com.example.bowon.graduationworkdebug.R;
 
 public class MainMixedView extends AppCompatActivity implements SensorEventListener{
 

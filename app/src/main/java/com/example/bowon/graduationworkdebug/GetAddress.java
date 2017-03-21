@@ -19,7 +19,7 @@ public class GetAddress {
 
 
 
-    GetAddress(Context context){
+    public GetAddress(Context context){
         this.context = context;
         geocoder = new Geocoder(context, Locale.KOREA);
     }
