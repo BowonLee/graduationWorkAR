@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="11"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+
+    tools:context="com.example.bowon.graduationworkdebug.MainMixedView">
+
+    <TextureView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+
+        android:id="@+id/cameraTexturePreicew" />
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/tempText1"
+        android:text="textview1" />
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/tempText2"
+        android:layout_below="@+id/tempText1"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:text="textview2" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/tempText3"
+        android:text="textview1"
+        android:layout_below="@+id/tempText2"
+        android:layout_alignParentStart="true" />
+
+
+</RelativeLayout>
