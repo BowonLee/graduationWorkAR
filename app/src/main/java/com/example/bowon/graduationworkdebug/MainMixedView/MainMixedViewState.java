@@ -1,5 +1,9 @@
 package com.example.bowon.graduationworkdebug.MainMixedView;
 
+import com.example.bowon.graduationworkdebug.CalculateUtil;
+import com.example.bowon.graduationworkdebug.render.Matrix;
+import com.example.bowon.graduationworkdebug.render.MixVector;
+
 /**
  * Created by bowon on 2017-03-21.
  */
@@ -27,7 +31,51 @@ public class MainMixedViewState {
     //Detail뷰가 뭔지 잘 모르겠다 일단 해놓고 나중에 분석해봐야겠다.
     private boolean detailsView;
 
-   // public boolean handleEvent(MainMixedViewContext context,String Onpress )
+    public boolean handleEvent(MainMixedViewContext context,String onPress ) {
+        //데이터랜들러 - 마커 - 마커 클릭시 이벤트 처리의 일부분
+        //원래는 웹페이지를 파싱하였다.
+
+        if(onPress != null && onPress.startsWith("webpage")){
+            String webpage = CalculateUtil.parseAction(onPress);
+            this.detailsView = true;
+            //context에서 웹페이지를 부른다.
+        }
+        return true;
+    }
+
+    //현제 기기의 방위각
+    public float getCurBearing(){return currentBearing;}
+
+    //현제 기기의 장치각
+    public float getCurPitch(){return currentPitch;}
+
+    //디테일 뷰의 표시 여부를 리턴한다.
+    public boolean isDetailsView(){return detailsView;}
+
+    //디테일뷰의 표시 여부를 설정
+    public void setDetailsView(boolean detailsView){this.detailsView = detailsView;}
+
+    /*
+    장치의 방위각을 계산한다.
+    사실상의 핵심 기능
+    */
+    /*필요인자 - 결과
+    * 카메라의 회전행렬 - 장치의 기기각
+    * Datahandler에서 사용이 되며 이후 인자정보에 대하여 생각해봐야 한다.
+    * */
+    public void calculatePitchBearing(Matrix rotationM){
+        MixVector looking = new MixVector();
+        rotationM.transpose();
+        looking.set(1,0,0);
+        looking.prod(rotationM);
+        this.currentBearing = (int)(CalculateUtil.getAngle(0,0,looking.x,looking.z)+360)%360;
+
+        rotationM.transpose();
+        looking.set(0,1,0);
+        looking.prod(rotationM);
+        this.currentPitch = -CalculateUtil.getAngle(0,0,looking.y,looking.z);
+
+    }
 
 
 }
