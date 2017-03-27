@@ -47,6 +47,9 @@ public class ArgumentedDataHandler {
     private DataHandlerForMarker dataHandlerForMarker = new DataHandlerForMarker();
     private  float radius = 20;// 검색 반경 설정
 
+    /*마커의 표시에서 사용되는 추가 수치 - 아직 정확이 뭔지 모름*/
+    private float addX = 0,addY = 0;
+
     private boolean isLauncherStarted;
 
     /** 스트링 객체 값 추후 생성되면 입력  **/
@@ -133,6 +136,37 @@ public class ArgumentedDataHandler {
         currentFixLocation = mainMixedViewContext.getCurrentLocation();
 
         mainMixedViewState.calculatePitchBearing(cameraData.transform);
+
+
+        /**
+         * 다운로드 메니져를 이용하여 데이터들을 파싱받은 이후 마커들을 만들어 준다.
+         * 마커들은 여기서 생성된다.
+         * 우선 마커들은 임의로 생성하도록 한다.
+         *
+         *
+         * 마커 1 - 인천대학산도서관
+         * la 37.3751636 lo 126.6339779  at 0.0
+         *
+         * 마커 2 - 인천대학교 프로젝트 실무실
+         * la 37.3748073 lo 126.6335562  at 0.0
+         * 마커 3 - 인천대 입구역
+         *
+         * */
+
+        /**
+         * 위에서 생성된 마커들을 선별하여 표시하도록 설정한다.
+         * */
+
+        dataHandlerForMarker.updateActivateStatus(mainMixedViewContext);
+
+        for(int i = dataHandlerForMarker.getMarkerLisrSize() -1;i>=0;i++){
+            Marker marker = dataHandlerForMarker.getMarker(i);
+            if(!frozen){marker.calcPaint(cameraData,addX,addY);}
+            marker.draw(dw);
+        }
+
+        /*이후 레이더를 그리거나 이벤트들을 설정한다.*/
+        mainMixedViewState.nextStatus = MainMixedViewState.PROCESSING;// 처리중 설정
     }
 
 
