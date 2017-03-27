@@ -14,6 +14,11 @@ import java.util.List;
  * Created by bowon on 2017-03-20.
  */
 
+/**
+ * datahandler구현중
+ *
+ * 기존의 Datahandler클레스를 가져왔다. 사용 용도가 Maker의 보조뿐이기에 이름을 변경하였다.
+ * */
 public class DataHandlerForMarker {
     //마커들의 리스트 생성
     private List<Marker> markerList = new ArrayList<Marker>();
@@ -28,10 +33,13 @@ public class DataHandlerForMarker {
         }
     }
 
+    //내장 정렬 클레스를 이용하여 정렬을 사킨다.
     public void sortMarkerList() {
         Collections.sort(markerList);
 
     }
+
+
 
 
     public void updateActivateStatus(MainMixedViewContext context){
@@ -60,9 +68,11 @@ public class DataHandlerForMarker {
         }
 
     }
+
+    //자신의 위치가 변경되었을 경우 거리갱신을 위해 호출된다.
     public void onLocationChanged(Location location){
         updateDistances(location);
-        //sortMarkerList();
+        sortMarkerList();
         for(Marker ma:markerList){
             ma.update(location);
         }

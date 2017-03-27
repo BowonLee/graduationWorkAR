@@ -4,9 +4,8 @@ import java.text.DecimalFormat;
 import java.util.Comparator;
 
 
-
+import com.example.bowon.graduationworkdebug.render.CameraData;
 import com.example.bowon.graduationworkdebug.render.MixVector;
-import com.example.bowon.graduationworkdebug.render.Camera;
 import com.example.bowon.graduationworkdebug.PhysicalPlace;
 import com.example.bowon.graduationworkdebug.gui.ScreenObj;
 import com.example.bowon.graduationworkdebug.gui.PaintScreen;
@@ -102,7 +101,7 @@ abstract public class Marker implements Comparable<Marker>{
 
 
     // 카메라 마커. 최초 위치와 투영될 카메라, 추가되는 x, y 값을 인자로 받는다
-    private void cCMarker(MixVector originalPoint, Camera viewCam, float addX, float addY) {
+    private void cCMarker(MixVector originalPoint, CameraData viewCam, float addX, float addY) {
 
         // 임시 속성들
         MixVector tmpa = new MixVector(originalPoint);
@@ -127,7 +126,7 @@ abstract public class Marker implements Comparable<Marker>{
     }
 
     // 고도를 계산. 이제는 쓰이지 않는듯?
-    private void calcV(Camera viewCam) {
+    private void calcV(CameraData viewCam) {
         isVisible = false;	// 일단 보이지 않는 상태로 만들고
 //		isLookingAt = false;
 //		deltaCenter = Float.MAX_VALUE;
@@ -171,7 +170,7 @@ abstract public class Marker implements Comparable<Marker>{
     }
 
     // 그려질 위치를 계산
-    public void calcPaint(Camera viewCam, float addX, float addY) {
+    public void calcPaint(CameraData viewCam, float addX, float addY) {
         cCMarker(origin, viewCam, addX, addY);	// 카메라 마커를 생성
         calcV(viewCam);	// 카메라의 고도를 계산
     }
