@@ -56,6 +56,8 @@ public class MainMixedView extends AppCompatActivity implements SensorEventListe
 
     private GetAddress getAddress;
 
+    public static final String PREFS_CODE = "MainMixedViewSettings";
+
     //위치정보
     LocationCoordinate locationCoordinate;
     @Override

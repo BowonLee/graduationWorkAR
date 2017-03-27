@@ -10,6 +10,7 @@ import com.example.bowon.graduationworkdebug.DataManagement.DataHandlerForMarker
 import com.example.bowon.graduationworkdebug.MainMixedView.MainMixedView;
 import com.example.bowon.graduationworkdebug.MainMixedView.MainMixedViewContext;
 import com.example.bowon.graduationworkdebug.MainMixedView.MainMixedViewState;
+import com.example.bowon.graduationworkdebug.gui.PaintScreen;
 import com.example.bowon.graduationworkdebug.render.CameraData;
 
 import java.util.ArrayList;
@@ -30,8 +31,6 @@ public class ArgumentedDataHandler {
     private boolean isInit;
 
     private  int width,height;
-
-
 
     /*카메라 객체를 다루고 있다.*/
     private CameraData cameraData;
@@ -89,6 +88,8 @@ public class ArgumentedDataHandler {
     public void doStart(){
         //상태를 지정한다
         //현제의 위치를 마지막 다운로드 위치로 설정한다. 즉 , 현제의 위치를 등록한다.
+        mainMixedViewState.nextStatus = MainMixedViewState.NOT_STARTED;
+        mainMixedViewContext.setLocationAtLastDownload(currentFixLocation);
     }
 
     //초기 세팅이 외어 있는지의 여부 확인 및 초기 세팅
@@ -112,12 +113,34 @@ public class ArgumentedDataHandler {
 
     }
 
+    /**
+     * 기존에 사용되는 DATAFORMAT을 사용하여 호출 할 URL을 만들고
+     * 그URL을 context의 다운로더에 제출하여 데이터를 받아오느 ㄴ것 이다.
+     * */
  //   public void requestData(String url)
 
+    /**
+     * 실제로 스크린에 여러가지 정보들을 그려주는 클레스이다.
+     * 마커의 표시부터 시작하여
+     * 사실상 이 프로그렘의 핵심 구현 부분이라고 해도 된다.
+     * 수식을 이용하여 기기의 특성을 계산하고 기기의 화면에 위치정보값을 출력시키기도 한다.
+     * */
+    public void draw(PaintScreen dw){
 
+        //카메라 객체의 회전행렬에 context가 가지고 있는 회전 행렬을 할당한다.
+        mainMixedViewContext.getRotationMatrix(cameraData.transform);
+        //현제위치를 context에 요청하여 할당받는다.
+        currentFixLocation = mainMixedViewContext.getCurrentLocation();
+
+        mainMixedViewState.calculatePitchBearing(cameraData.transform);
+    }
 
 
 }
+
+
+
+
 /*
 * UI 상에서 발생하는 이벤트에 관련 된 리스너
 * 이벤트는 크게 두가지로 나누어진다.

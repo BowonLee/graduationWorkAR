@@ -23,7 +23,7 @@ public class MainMixedViewState {
     public static int READY = 2;
     public static int DONE = 3;
 
-    int nextStatus = MainMixedViewState.NOT_STARTED;
+    public int nextStatus = MainMixedViewState.NOT_STARTED;
 
     private float currentBearing;
     private float currentPitch;
