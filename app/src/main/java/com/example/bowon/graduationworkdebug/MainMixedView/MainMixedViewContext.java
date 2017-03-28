@@ -5,7 +5,6 @@ import android.content.ContextWrapper;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationManager;
-import android.util.Log;
 
 import com.example.bowon.graduationworkdebug.PermissionHelper;
 import com.example.bowon.graduationworkdebug.render.Matrix;
@@ -30,7 +29,7 @@ import java.util.Random;
 public class MainMixedViewContext extends ContextWrapper {
 
     Context context;
-    public MainMixedView mainMixedView;
+    public MainMixedViewActivity mainMixedViewActivity;
     Random rand;// 헤쉬값 계산을 위한 난수발생함수
 
     Location currentLocation;
@@ -57,9 +56,9 @@ public class MainMixedViewContext extends ContextWrapper {
         /*뷰와 context를 할당 받는다.*/
 
        this.context = context;
-        mainMixedView = (MainMixedView)context;
+        mainMixedViewActivity = (MainMixedViewActivity)context;
 
-        SharedPreferences sharedSettings = getSharedPreferences(MainMixedView.PREFS_CODE,0);
+        SharedPreferences sharedSettings = getSharedPreferences(MainMixedViewActivity.PREFS_CODE,0);
 
         /*
         * 원래 데이터 소스를 통해 데이터를 필터링하는 기능이 있어 해당 내용에 대한

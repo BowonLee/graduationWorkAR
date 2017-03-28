@@ -7,13 +7,10 @@ package com.example.bowon.graduationworkdebug;
 import android.location.Location;
 
 import com.example.bowon.graduationworkdebug.DataManagement.DataHandlerForMarker;
-import com.example.bowon.graduationworkdebug.MainMixedView.MainMixedView;
 import com.example.bowon.graduationworkdebug.MainMixedView.MainMixedViewContext;
 import com.example.bowon.graduationworkdebug.MainMixedView.MainMixedViewState;
 import com.example.bowon.graduationworkdebug.gui.PaintScreen;
 import com.example.bowon.graduationworkdebug.render.CameraData;
-
-import java.util.ArrayList;
 
 
 /**

@@ -9,7 +9,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.NoActionBar">
 
-        <activity android:name=".MainMixedView.MainMixedView">
+        <activity android:name=".MainMixedView.MainMixedViewActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

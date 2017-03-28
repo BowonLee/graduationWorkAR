@@ -1,15 +1,18 @@
 package com.example.bowon.graduationworkdebug.MainMixedView;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.PowerManager;
 import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -17,24 +20,53 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.TextureView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.example.bowon.graduationworkdebug.ArgumentedDataHandler;
 import com.example.bowon.graduationworkdebug.AugmentedView;
 import com.example.bowon.graduationworkdebug.Datatype.LocationCoordinate;
 import com.example.bowon.graduationworkdebug.GetAddress;
 import com.example.bowon.graduationworkdebug.PermissionHelper;
 import com.example.bowon.graduationworkdebug.R;
+import com.example.bowon.graduationworkdebug.render.Matrix;
 
-public class MainMixedView extends AppCompatActivity implements SensorEventListener{
+public class MainMixedViewActivity extends AppCompatActivity implements SensorEventListener{
 
-
+    /*Log용 태그*/
+    public static final String TAG = "MainMixedViewActivity";
+    /**
+     * 이전 데이터 표시들을 위해 임시로 사용하는 UI
+     * */
     TextView tempText1;
     TextView tempText2;
     TextView tempText3;
 
+    /*angle 계산을 위한 메트릭스*/
+    Matrix matrix1,matrix2,matrix3,matrix4;
+    private int rHistIdx = 0;
+    private Matrix tempR = new Matrix();
+    private Matrix finalR = new Matrix();
+    private Matrix smoothR = new Matrix();
+    private Matrix histR[] = new Matrix[60];
+
+    /**/
+
+    /*초기세팅 여부 판단*/
+    private boolean isInited = false;
+
+    /*메인뷰를 서포트하기 위한 뷰들*/
+    private MainMixedViewContext mainMixedViewContext;
+    private MainMixedViewState mainMixedViewState;
+    private ArgumentedDataHandler argumentedDataHandler;
+
+    /*카메라 프리뷰 사용을 위한 설정*/
     private TextureView cameraTexturePreview;
     private Camera2Preview camera2Preview;
 
 
+    /*
+    * sensor 사용을 휘해 사용되는 객체들
+    * */
     private SensorManager sensorManager;
     private Sensor sensorAccelerometer;
     private Sensor sensorGeoScope;
@@ -43,9 +75,10 @@ public class MainMixedView extends AppCompatActivity implements SensorEventListe
     LocationManager locationManager;
     PermissionHelper permissionHelper;
 
+    /* 증강데이터 부분을 다룰 증강뷰*/
     private AugmentedView argumentedView;
 
-
+    /*센서 합성을 위해 사용되는 센서 배열값*/
     float[] mAccelerometerReading= new float[3];
     float[] mMagnetometerReading= new float[3];
 
@@ -58,31 +91,86 @@ public class MainMixedView extends AppCompatActivity implements SensorEventListe
 
     public static final String PREFS_CODE = "MainMixedViewSettings";
 
+    /*화면이 꺼지지 않도록 웨이크락 섷정*/
+    private PowerManager.WakeLock mWakeLock;
+    /*private*/
+
     //위치정보
     LocationCoordinate locationCoordinate;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
 
+        /*자체 센서 메니저 사용을 휘해 설정*/
         locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
         sensorManager = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
-
+        /*추후 웨이크락 사용시 사용*/
 
 
         locationCoordinate = new LocationCoordinate();
         cameraTexturePreview = (TextureView)findViewById(R.id.cameraTexturePreicew);
         camera2Preview = new Camera2Preview(this,cameraTexturePreview);
 
+        /*내부 메모리 프리퍼런스 호출 - 셋팅 저장용*/
+        SharedPreferences settings = getSharedPreferences(PREFS_CODE, 0);
+        SharedPreferences.Editor editor = settings.edit();
+
+        /*프로그레스바와 줌 바가 설정이 되어있긴하다.*/
+        /*이 부분은 나중에 좀더 생각해 보도록 한다.*/
+
+
+        /*증강 스크린 설정*/
         argumentedView = new AugmentedView(this);
         addContentView(argumentedView, new ActionBar.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT, ActionBar.LayoutParams.MATCH_PARENT));
+
+        if(!isInited){
+            mainMixedViewContext = new MainMixedViewContext(this);
+            // 서버로부터 다운로드를 할 다운로드 관리자 설정
+
+            argumentedDataHandler = new ArgumentedDataHandler(mainMixedViewContext);
+            isInited = true;
+        }
+        if(settings.getBoolean("firstAccess",false)==false){
+            /*어플리케이션 최초 실행시의 처리
+            * 추후 구현될 로그인 및 최초 처리에 있어 사용하기 위해 남겨놓는다.
+            * */
+        }
+
 
         sensorAccelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         sensorGeoScope = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
        // sensorRotationVector = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
 
-
+        /*geocodeing 사용을 위한 geocode 객체*/
         getAddress = new GetAddress(this);
+
+
+
+    }
+
+    /*센서값을 회전시켜 엥글을 계산시킨다.*/
+    /*
+    * matrix 1~3을 각각 삼각행렬을 설정시켜놓고 matrix4를 기준행렬로 만들어 놓는다.
+    * */
+    private void setViewAngleMatrix(){
+        double angleX,angleY;
+        angleX = Math.toRadians(-90);
+        matrix1.set(1f, 0f, 0f, 0f, (float) Math.cos(angleX), (float) -Math
+                .sin(angleX), 0f, (float) Math.sin(angleX), (float) Math.cos(angleX));
+
+        angleX = Math.toRadians(-90);
+        angleY = Math.toRadians(-90);
+
+        matrix2.set(1f, 0f, 0f, 0f, (float) Math.cos(angleX), (float) -Math
+                .sin(angleX), 0f, (float) Math.sin(angleX), (float) Math.cos(angleX));
+        matrix3.set((float) Math.cos(angleY), 0f, (float) Math.sin(angleY),
+                0f, 1f, 0f, (float) -Math.sin(angleY), 0f, (float) Math.cos(angleY));
+        matrix4.toIdentity();
+        for(int i=0;i<histR.length;i++){
+            histR[i] = new Matrix();
+        }
 
     }
 
@@ -93,21 +181,57 @@ public class MainMixedView extends AppCompatActivity implements SensorEventListe
         setTempTextview();
         getPermissionGroup();
 
-        try {
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,1000,1,mLocationListener);
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,1000,1,mLocationListener);
+        mainMixedViewContext.mainMixedViewActivity = this;
+        argumentedDataHandler.doStart();
 
-        }catch (SecurityException e){
-            Log.d("Exception","security");
-        }
-        updateTextview();
-        camera2Preview.onResume();
+        /*ViewAngle설정을 위해 사용*/
+       setViewAngleMatrix();
 
+        /* 지자기센서와 가속도센서 등록*/
         sensorManager.registerListener(this, sensorAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
         sensorManager.registerListener(this, sensorGeoScope, SensorManager.SENSOR_DELAY_NORMAL);
 
 
+        try {
+            Criteria criteria = new Criteria();
+            criteria.setAccuracy(Criteria.ACCURACY_FINE);
+            /*
+            이걸 왜 여기서 다시 호출하는지는 의문 나중에 디버그 단계에서 create나 resume에서
+            한번씩 지워보고 다시 해봐야 한다.
+             *  */
+            locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,1000,10,mLocationListener);
 
+           // locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,1000,1,mLocationListener);
+
+            /*각 provider로부터 데이터를 각각 읽어온다.*/
+            Location gps,network;
+
+            gps = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            network = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+
+            /*정확도가 더 좋은  gps를 우선적으로 등록하며 만일 gps 수신이 불가능할 경우에만 network를
+            * 사용하여 등록하도록 한다.
+            * */
+            if(gps != null){
+                mainMixedViewContext.currentLocation = gps;
+            }else if(network != null){
+                mainMixedViewContext.currentLocation = network;
+            }else{
+            }
+            mainMixedViewContext.setLocationAtLastDownload(mainMixedViewContext.currentLocation);
+            /**자신의 위치 등록 종려*/
+        }catch (SecurityException e){
+            Log.d("Exception","security");
+        }
+
+        updateTextview();
+        camera2Preview.onResume();
+
+
+         if(mainMixedViewContext.isActualLocation()==false){
+            Toast.makeText(this, "Location is Not Actualable",Toast.LENGTH_LONG).show();
+        }
 
     }
 
@@ -218,9 +342,10 @@ public class MainMixedView extends AppCompatActivity implements SensorEventListe
         //0 : 방위각 z 1 : 피치(x) 2:롤(y)
        if(event.sensor.getType() == Sensor.TYPE_ACCELEROMETER){
         System.arraycopy(event.values,0,mAccelerometerReading,0,mAccelerometerReading.length);
-
+        /*증강뷰에 변경을 알려야함*/
        }else if(event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD){
            System.arraycopy(event.values,0,mMagnetometerReading,0,mMagnetometerReading.length);
+       /*여기도*/
        }
 
 
@@ -240,13 +365,51 @@ public class MainMixedView extends AppCompatActivity implements SensorEventListe
     //End of sensorListener
 
     //위에서 구한 벡터를 이용하여 방위데이터를 구한다.
-    public void updateOrientationAngles(){
+    /*잘 모르겠다. 나중에 삼각변환행렬 학습 이후에야 조금 알 수 있을 것 같다.*/
+    private void updateOrientationAngles(){
+
+        float Rot[] = new float[9];
+        float I[] = new float[9];
+
         // 메트릭스 데이터
         sensorManager.getRotationMatrix(mRotationMatrix,null,mAccelerometerReading,mMagnetometerReading);
 
+        sensorManager.remapCoordinateSystem(mRotationMatrix,SensorManager.AXIS_X,SensorManager.AXIS_MINUS_Z,Rot);
+
+        tempR.set(Rot[0], Rot[1], Rot[2], Rot[3], Rot[4], Rot[5], Rot[6], Rot[7],
+                Rot[8]);
+
+        finalR.toIdentity();
+        finalR.prod(matrix4);
+        finalR.prod(matrix1);
+        finalR.prod(tempR);
+        finalR.prod(matrix3);
+        finalR.prod(matrix2);
+        finalR.invert();
+
+        // 이후 부분에 대해서는 더 분석이 필요할 것 같다...
+        histR[rHistIdx].set(finalR);
+        rHistIdx++;
+        if (rHistIdx >= histR.length)
+            rHistIdx = 0;
+
+        smoothR.set(0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f);
+
+        for (int i = 0; i < histR.length; i++) {
+            smoothR.add(histR[i]);
+        }
+        smoothR.mult(1 / (float) histR.length);
+
+        /*결국 최종값을 MainMixedViewContext의 변환행렬에 등록을 하였다.
+        * 아마도 이 값은 이 어플리케이션 사용환경에 맞게 회전되어진 센서의 산출값일 것 이다.
+        * */
+        synchronized (mainMixedViewContext.rotationMatrix) {
+            mainMixedViewContext.rotationMatrix.set(smoothR);
+        }
+
         // 방위각도데이터
-        sensorManager.getOrientation(mRotationMatrix,mOrientationAngles);
-        //0 azimuth방위 1 pitch상하경사 2 roll좌우경사
+        // sensorManager.getOrientation(mRotationMatrix,mOrientationAngles);
+        // 0 azimuth방위 1 pitch상하경사 2 roll좌우경사
 
         /*
         * 회전시 변화
