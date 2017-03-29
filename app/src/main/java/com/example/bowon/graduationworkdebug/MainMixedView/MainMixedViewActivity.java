@@ -3,7 +3,6 @@ package com.example.bowon.graduationworkdebug.MainMixedView;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -23,7 +22,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.bowon.graduationworkdebug.ArgumentedDataHandler;
-import com.example.bowon.graduationworkdebug.AugmentedView;
 import com.example.bowon.graduationworkdebug.Datatype.LocationCoordinate;
 import com.example.bowon.graduationworkdebug.GetAddress;
 import com.example.bowon.graduationworkdebug.PermissionHelper;
@@ -33,7 +31,7 @@ import com.example.bowon.graduationworkdebug.render.Matrix;
 public class MainMixedViewActivity extends AppCompatActivity implements SensorEventListener, LocationListener{
 
     /*Log용 태그*/
-    public static final String TAG = "MainMixedViewActivity";
+    private static final String TAG = "MainMixedViewActivity";
     /**
      * 이전 데이터 표시들을 위해 임시로 사용하는 UI
      * */
@@ -42,7 +40,11 @@ public class MainMixedViewActivity extends AppCompatActivity implements SensorEv
     TextView tempText3;
 
     /*angle 계산을 위한 메트릭스*/
-    Matrix matrix1,matrix2,matrix3,matrix4;
+    Matrix matrix1 = new Matrix();
+    Matrix matrix2 = new Matrix();
+    Matrix matrix3 = new Matrix();
+    Matrix matrix4 = new Matrix();
+
     private int rHistIdx = 0;
     private Matrix tempR = new Matrix();
     private Matrix finalR = new Matrix();
@@ -159,7 +161,8 @@ public class MainMixedViewActivity extends AppCompatActivity implements SensorEv
         double angleX,angleY;
         angleX = Math.toRadians(-90);
         matrix1.set(1f, 0f, 0f, 0f, (float) Math.cos(angleX), (float) -Math
-                .sin(angleX), 0f, (float) Math.sin(angleX), (float) Math.cos(angleX));
+                .sin(angleX), 0f, (float) Math.sin(angleX), (float) Math
+                .cos(angleX));
 
         angleX = Math.toRadians(-90);
         angleY = Math.toRadians(-90);
@@ -323,8 +326,7 @@ public class MainMixedViewActivity extends AppCompatActivity implements SensorEv
         updateOrientationAngles();
 
 
-        tempText3.setText("방위 : "+Math.toDegrees(mOrientationAngles[0])+"\n상하경사 : "+Math.toDegrees(mOrientationAngles[1])+"\n좌우경사 : "+Math.toDegrees(mOrientationAngles[2]));
-        //tempText3.setBackgroundColor(Color.WHITE);
+         //tempText3.setBackgroundColor(Color.WHITE);
 
     }
 
@@ -371,6 +373,9 @@ public class MainMixedViewActivity extends AppCompatActivity implements SensorEv
         synchronized (mainMixedViewContext.rotationMatrix) {
             mainMixedViewContext.rotationMatrix.set(smoothR);
         }
+        tempText3.setText("방위 : "+Math.toDegrees(mOrientationAngles[0])+
+                "\n상하경사 : "+Math.toDegrees(mOrientationAngles[1])+"\n좌우경사 : "+
+                Math.toDegrees(mOrientationAngles[2]));
 
         // 방위각도데이터
         // sensorManager.getOrientation(mRotationMatrix,mOrientationAngles);

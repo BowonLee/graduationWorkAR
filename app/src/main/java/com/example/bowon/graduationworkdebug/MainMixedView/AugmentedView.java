@@ -1,4 +1,4 @@
-package com.example.bowon.graduationworkdebug;
+package com.example.bowon.graduationworkdebug.MainMixedView;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -34,10 +34,7 @@ public class AugmentedView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        Paint paint = new Paint();
-        paint.setAntiAlias(true);
-        paint.setColor(Color.GREEN);
-        canvas.drawText("augumentedView",300,300,paint);
+
 
 
 

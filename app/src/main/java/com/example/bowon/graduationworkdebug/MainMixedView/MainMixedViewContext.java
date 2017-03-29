@@ -71,7 +71,7 @@ public class MainMixedViewContext extends ContextWrapper {
         int locationHash = 0;
 
         try {
-            permissionHelper.LocationPermission();
+//            permissionHelper.LocationPermission();
             locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
 
             /*우선 자신의 위치를 GPS로 받아보고 GPS수신이 어려울 경우 NetworkProvider를 사용해 받는다. */
