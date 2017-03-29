@@ -13,8 +13,13 @@ import android.view.View;
 /**
  * Created by bowon on 2017-02-23.
  */
-
-public class AugmentedView extends View implements LocationListener{
+/*
+* 메인뷰에 증강되어 함께 그려지는 뷰이다
+* 실질적으로 '그려지는' 즉 draw객체를 통해 표현되는 정보들이 그려지며
+ * Datahandler가 이 뷰를 통해 이 뷰의 draw객체값을 가지고
+ * Marker를 그려낸다.
+* */
+public class AugmentedView extends View {
 
     /**/
     Context context;
@@ -38,23 +43,4 @@ public class AugmentedView extends View implements LocationListener{
 
     }
 
-    @Override
-    public void onLocationChanged(Location location) {
-
-    }
-
-    @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-
-    }
-
-    @Override
-    public void onProviderEnabled(String provider) {
-
-    }
-
-    @Override
-    public void onProviderDisabled(String provider) {
-
-    }
 }

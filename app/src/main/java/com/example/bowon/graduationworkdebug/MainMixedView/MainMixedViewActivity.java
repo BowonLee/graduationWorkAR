@@ -30,7 +30,7 @@ import com.example.bowon.graduationworkdebug.PermissionHelper;
 import com.example.bowon.graduationworkdebug.R;
 import com.example.bowon.graduationworkdebug.render.Matrix;
 
-public class MainMixedViewActivity extends AppCompatActivity implements SensorEventListener{
+public class MainMixedViewActivity extends AppCompatActivity implements SensorEventListener, LocationListener{
 
     /*Log용 태그*/
     public static final String TAG = "MainMixedViewActivity";
@@ -71,6 +71,7 @@ public class MainMixedViewActivity extends AppCompatActivity implements SensorEv
     private Sensor sensorAccelerometer;
     private Sensor sensorGeoScope;
     private Sensor sensorRotationVector;
+    private boolean isGpsProviderEnable;
 
     LocationManager locationManager;
     PermissionHelper permissionHelper;
@@ -200,7 +201,7 @@ public class MainMixedViewActivity extends AppCompatActivity implements SensorEv
             한번씩 지워보고 다시 해봐야 한다.
              *  */
             locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,1000,10,mLocationListener);
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,1000,10, this);
 
            // locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,1000,1,mLocationListener);
 
@@ -301,37 +302,6 @@ public class MainMixedViewActivity extends AppCompatActivity implements SensorEv
 
 
 
-    private  LocationListener mLocationListener = new LocationListener() {
-
-
-        private void LocationDataUpdate(Location location){
-            //location좌표 객체 셋팅
-            locationCoordinate.setLocation(location);
-
-        }
-
-        @Override
-        public void onLocationChanged(Location location) {
-            LocationDataUpdate(location);
-            updateTextview();
-            Log.d("location","update");
-        }
-
-        @Override
-        public void onStatusChanged(String provider, int status, Bundle extras) {
-
-        }
-
-        @Override
-        public void onProviderEnabled(String provider) {
-
-        }
-
-        @Override
-        public void onProviderDisabled(String provider) {
-
-        }
-    };//end of LoccationListener
 
     //Start of sensorListener
 
@@ -358,11 +328,6 @@ public class MainMixedViewActivity extends AppCompatActivity implements SensorEv
 
     }
 
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-
-    }
-    //End of sensorListener
 
     //위에서 구한 벡터를 이용하여 방위데이터를 구한다.
     /*잘 모르겠다. 나중에 삼각변환행렬 학습 이후에야 조금 알 수 있을 것 같다.*/
@@ -418,4 +383,91 @@ public class MainMixedViewActivity extends AppCompatActivity implements SensorEv
         * 좌우경사    :-> 방위
         * */
     }
+
+
+    /*start of LocationListener*/
+
+    /*위치데이터의 수신을 받고 이를 처리한다*/
+    private void LocationDataUpdate(Location location){
+        //location좌표 객체 셋팅
+        locationCoordinate.setLocation(location);
+
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        LocationDataUpdate(location);
+        updateTextview();
+        Log.d("location","update");
+
+        if(LocationManager.GPS_PROVIDER.equals(location.getProvider())){
+           /*
+           *  가장 정확한 위치 제공자인 GPS를 통한 값 만을 받으며
+           *  위치 정확도를 유지한다.
+           * */
+            synchronized (mainMixedViewContext.currentLocation){
+                mainMixedViewContext.currentLocation = location;
+            }
+
+            if(argumentedDataHandler.isFrozen()){
+                /*이후에 데이터 핸들러의 상태가 정상적이라면 데이터 헨들러를 통해
+                * 자신의 위치 변경을 알린다.
+                * 여기서 위치변경이 알려지면 마커의 거리표시와, 현제 표시할 마커등의 데이터를
+                * 바뀐 위치 기준으로 정렬시킨다.
+                *
+                *
+                * */
+                argumentedDataHandler.getDataHandlerForMarker().onLocationChanged(location);
+            }
+
+            /**
+             데이터핸들러 실행 이후 일정 거리가 넘어가면 해당 위치 기준으로 다시
+             서버와의 통신을 통해 데이터를 받아야 하므로 거리를 판단하여 재 할당 받는 것 이다.
+             * */
+            Location tempLastLocation = mainMixedViewContext.getLocationAtLastDownload();
+            if(tempLastLocation == null) {
+                /*만일 현제 데이터 핸들러 상의 위치정보가 없다면 (오류나 최초실행의 경우)
+                * 현제 위치를 등록해준다.
+                * */
+                mainMixedViewContext.setLocationAtLastDownload(location);
+            }else{
+                float threshold = argumentedDataHandler.getRadius()*1000f/3f;
+                if(location.distanceTo(tempLastLocation)>threshold){
+                    argumentedDataHandler.doStart();
+
+                }
+                /*gps가 현제 사용 가능한 상태라는 것을 알려준다.*/
+                isGpsProviderEnable = true;
+            }
+
+        }
+
+
+
+
+
+    }
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+     /*센서의 정확도가 변경되었을 경우*/
+
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+        /*위치제공자의 유형이 변경되었을 경우 처리*/
+        isGpsProviderEnable = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+        /*위치를 제공받지 못하는 경우의 처리를 한다.*/
+        isGpsProviderEnable = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+    }
+    /*end of LocationListener*/
 }
