@@ -26,6 +26,7 @@ import com.example.bowon.graduationworkdebug.Datatype.LocationCoordinate;
 import com.example.bowon.graduationworkdebug.GetAddress;
 import com.example.bowon.graduationworkdebug.PermissionHelper;
 import com.example.bowon.graduationworkdebug.R;
+import com.example.bowon.graduationworkdebug.gui.PaintScreen;
 import com.example.bowon.graduationworkdebug.render.Matrix;
 
 public class MainMixedViewActivity extends AppCompatActivity implements SensorEventListener, LocationListener{
@@ -59,7 +60,7 @@ public class MainMixedViewActivity extends AppCompatActivity implements SensorEv
     /*메인뷰를 서포트하기 위한 뷰들*/
     private MainMixedViewContext mainMixedViewContext;
     private MainMixedViewState mainMixedViewState;
-    private ArgumentedDataHandler argumentedDataHandler;
+    static ArgumentedDataHandler argumentedDataHandler;
 
     /*카메라 프리뷰 사용을 위한 설정*/
     private TextureView cameraTexturePreview;
@@ -88,6 +89,7 @@ public class MainMixedViewActivity extends AppCompatActivity implements SensorEv
     float[] mRotationMatrix = new float[9];
     float[] mOrientationAngles = new float[3];
 
+    static PaintScreen dWindow;
 
 
     private GetAddress getAddress;
@@ -131,7 +133,7 @@ public class MainMixedViewActivity extends AppCompatActivity implements SensorEv
         if(!isInited){
             mainMixedViewContext = new MainMixedViewContext(this);
             // 서버로부터 다운로드를 할 다운로드 관리자 설정
-
+            dWindow = new PaintScreen();
             argumentedDataHandler = new ArgumentedDataHandler(mainMixedViewContext);
             isInited = true;
         }
@@ -178,6 +180,11 @@ public class MainMixedViewActivity extends AppCompatActivity implements SensorEv
 
     }
 
+    /*cos - sin =1
+    *
+    *
+    * */
+
 
     @Override
     protected void onResume() {
@@ -196,6 +203,7 @@ public class MainMixedViewActivity extends AppCompatActivity implements SensorEv
         sensorManager.registerListener(this, sensorGeoScope, SensorManager.SENSOR_DELAY_NORMAL);
 
 
+
         try {
             Criteria criteria = new Criteria();
             criteria.setAccuracy(Criteria.ACCURACY_FINE);
@@ -206,7 +214,7 @@ public class MainMixedViewActivity extends AppCompatActivity implements SensorEv
             locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,1000,10, this);
 
-           // locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,1000,1,mLocationListener);
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,1000,1,this);
 
             /*각 provider로부터 데이터를 각각 읽어온다.*/
             Location gps,network;
@@ -266,9 +274,10 @@ public class MainMixedViewActivity extends AppCompatActivity implements SensorEv
     }
     public void updateTextview(){
 
-        tempText1.setText("la : " + locationCoordinate.getLatitude() +"\nlo : " + locationCoordinate.getLongitude()+"\nat : " + locationCoordinate.getAltitude());
-        tempText2.setText("provider : " + locationCoordinate.getProvider() + "\nacc : " + locationCoordinate.getAccuracy()+"\naddress : " +getAddress.getAddressName(locationCoordinate.getLatitude(),locationCoordinate.getLongitude()) );
-
+        tempText1.setText("la : " + mainMixedViewContext.currentLocation.getLatitude() +"\nlo : " + mainMixedViewContext.currentLocation.getLongitude()+"\nat : " + mainMixedViewContext.currentLocation.getAltitude());
+        tempText2.setText("provider : " + mainMixedViewContext.currentLocation.getProvider() + "\nacc : " +
+                mainMixedViewContext.currentLocation.getAccuracy()+"\naddress : " +getAddress.getAddressName(mainMixedViewContext.currentLocation.getLatitude(),mainMixedViewContext.currentLocation.getLongitude()) );
+        Log.e(TAG,"la : " + mainMixedViewContext.currentLocation.getLatitude() +"\nlo : " + mainMixedViewContext.currentLocation.getLongitude()+"\nat : " + mainMixedViewContext.currentLocation.getAltitude());
     }
 
     @Override
@@ -401,9 +410,14 @@ public class MainMixedViewActivity extends AppCompatActivity implements SensorEv
 
     @Override
     public void onLocationChanged(Location location) {
-        LocationDataUpdate(location);
-        updateTextview();
+
+       // updateTextview();
         Log.d("location","update");
+
+        //synchronized (mainMixedViewContext.currentLocation){
+     //       mainMixedViewContext.currentLocation = location;
+        //}
+        LocationDataUpdate(location);
 
         if(LocationManager.GPS_PROVIDER.equals(location.getProvider())){
            /*
@@ -447,6 +461,9 @@ public class MainMixedViewActivity extends AppCompatActivity implements SensorEv
 
         }
 
+
+
+        updateTextview();
 
 
 

@@ -36,7 +36,16 @@ public class AugmentedView extends View {
         super.onDraw(canvas);
 
 
+        MainMixedViewActivity.dWindow.setWidth(canvas.getWidth());
+        MainMixedViewActivity.dWindow.setHeight(canvas.getHeight());
 
+        MainMixedViewActivity.dWindow.setCanvas(canvas);
+
+        if(!MainMixedViewActivity.argumentedDataHandler.isInit()){
+            MainMixedViewActivity.argumentedDataHandler.init(MainMixedViewActivity.dWindow.getWidth(),MainMixedViewActivity.dWindow.getHeight());
+        }
+
+        MainMixedViewActivity.argumentedDataHandler.draw(MainMixedViewActivity.dWindow);
 
     }
 
