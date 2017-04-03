@@ -1,6 +1,7 @@
 package com.example.bowon.graduationworkdebug.MainMixedView;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
@@ -18,12 +19,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.TextureView;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.bowon.graduationworkdebug.ArgumentedDataHandler;
 import com.example.bowon.graduationworkdebug.Datatype.LocationCoordinate;
 import com.example.bowon.graduationworkdebug.GetAddress;
+import com.example.bowon.graduationworkdebug.GoogleMapsViewAcrivity;
 import com.example.bowon.graduationworkdebug.PermissionHelper;
 import com.example.bowon.graduationworkdebug.R;
 import com.example.bowon.graduationworkdebug.gui.PaintScreen;
@@ -39,6 +43,11 @@ public class MainMixedViewActivity extends AppCompatActivity implements SensorEv
     TextView tempText1;
     TextView tempText2;
     TextView tempText3;
+
+    /*UI 구현을 위한 UI item 선언부*/
+    Button mapChangeButton;
+
+
 
     /*angle 계산을 위한 메트릭스*/
     Matrix matrix1 = new Matrix();
@@ -107,6 +116,17 @@ public class MainMixedViewActivity extends AppCompatActivity implements SensorEv
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
+
+        /*UI구성*/
+        mapChangeButton = (Button)findViewById(R.id.button_for_changeviewtype_map);
+
+        mapChangeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainMixedViewActivity.this, GoogleMapsViewAcrivity.class);
+                startActivity(intent);
+            }
+        });
 
         /*자체 센서 메니저 사용을 휘해 설정*/
         locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
