@@ -123,8 +123,10 @@ public class MainMixedViewActivity extends AppCompatActivity implements SensorEv
         mapChangeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainMixedViewActivity.this, GoogleMapsViewAcrivity.class);
-                startActivity(intent);
+                /*Intent intent = new Intent(MainMixedViewActivity.this, GoogleMapsViewAcrivity.class);
+                startActivity(intent);*/
+                MainMixedViewActivity.this.finish();
+
             }
         });
 

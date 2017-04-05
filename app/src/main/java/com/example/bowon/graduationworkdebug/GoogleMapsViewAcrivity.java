@@ -1,8 +1,12 @@
 package com.example.bowon.graduationworkdebug;
 
+import android.content.Intent;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
 
+import com.example.bowon.graduationworkdebug.MainMixedView.MainMixedViewActivity;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -10,10 +14,11 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-public class GoogleMapsViewAcrivity extends FragmentActivity implements OnMapReadyCallback {
+public class GoogleMapsViewAcrivity extends FragmentActivity implements OnMapReadyCallback{
 
     private GoogleMap mMap;
-
+    Button viewChangeButton;
+    PermissionHelper permissionHelper;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -22,6 +27,21 @@ public class GoogleMapsViewAcrivity extends FragmentActivity implements OnMapRea
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+        permissionHelper = new PermissionHelper(this);
+
+
+        viewChangeButton = (Button)findViewById(R.id.button_for_changeviewtype_camera);
+        viewChangeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(GoogleMapsViewAcrivity.  this, MainMixedViewActivity.class);
+                startActivity(intent);
+            }
+        });
+
+
+
+
     }
 
 
@@ -39,8 +59,16 @@ public class GoogleMapsViewAcrivity extends FragmentActivity implements OnMapRea
         mMap = googleMap;
 
         // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
+        LatLng sydney = new LatLng(37.374648, 126.633253);
+        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Incheon"));
+
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+       try {
+            permissionHelper.LocationCoarsePermission();
+            mMap.setMyLocationEnabled(true);
+        }catch (SecurityException e){
+            e.printStackTrace();
+        }
+
     }
 }

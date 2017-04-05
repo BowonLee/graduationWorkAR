@@ -18,6 +18,7 @@ public class PermissionHelper {
 
 
     public static final int LOCATION_ACCESS__FINE = 1; // 위치정보 퍼미션
+    public static final int LOCATION_ACCESS_COARSE = 3;
     public static final int CAMERA_PERMISSION = 2;
 
     Context currentActivity;
@@ -29,8 +30,10 @@ public class PermissionHelper {
     }
 
 
+
+
     //위치정보 퍼미션
-    public Boolean LocationPermission() {
+    public boolean LocationPermission() {
         permissionCheck = ContextCompat.checkSelfPermission(currentActivity, Manifest.permission.ACCESS_FINE_LOCATION);
         if (permissionCheck == PackageManager.PERMISSION_DENIED) {
             // 권한없음
@@ -58,6 +61,21 @@ public class PermissionHelper {
 
         }
     return false;
+    }
+
+    public boolean LocationCoarsePermission() {
+        permissionCheck = ContextCompat.checkSelfPermission(currentActivity, Manifest.permission.ACCESS_COARSE_LOCATION);
+        if (permissionCheck == PackageManager.PERMISSION_DENIED) {
+            // 권한없음
+            //권한 요청
+            ActivityCompat.requestPermissions((Activity) currentActivity, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, LOCATION_ACCESS_COARSE);
+            Log.d("LocationCPermission", "apply");
+            return true;
+        }else {
+            // 권한있음
+            Log.d("LocationCPermission", "already");
+        }
+        return false;
     }
 
 
