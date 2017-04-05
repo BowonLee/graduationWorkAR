@@ -1,7 +1,6 @@
-package com.example.bowon.graduationworkdebug;
+package com.example.bowon.graduationworkdebug.marker;
 
 import java.text.DecimalFormat;
-import java.util.Comparator;
 
 
 import com.example.bowon.graduationworkdebug.render.CameraData;
@@ -65,7 +64,7 @@ abstract public class Marker implements Comparable<Marker>{
 
 
         // 마커의 ID는 '데이터소스##타이틀' 형태이다
-
+        this.ID = title;
     }
 
     // 타이틀을 리턴

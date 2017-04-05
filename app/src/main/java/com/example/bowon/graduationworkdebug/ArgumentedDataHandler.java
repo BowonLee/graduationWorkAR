@@ -5,12 +5,18 @@ package com.example.bowon.graduationworkdebug;
  */
 
 import android.location.Location;
+import android.util.Log;
 
 import com.example.bowon.graduationworkdebug.DataManagement.DataHandlerForMarker;
 import com.example.bowon.graduationworkdebug.MainMixedView.MainMixedViewContext;
 import com.example.bowon.graduationworkdebug.MainMixedView.MainMixedViewState;
 import com.example.bowon.graduationworkdebug.gui.PaintScreen;
+import com.example.bowon.graduationworkdebug.marker.DummyMarker;
+import com.example.bowon.graduationworkdebug.marker.Marker;
 import com.example.bowon.graduationworkdebug.render.CameraData;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -146,17 +152,32 @@ public class ArgumentedDataHandler {
          *
          * 마커 2 - 인천대학교 프로젝트 실무실
          * la 37.3748073 lo 126.6335562  at 0.0
-         * 마커 3 - 인천대 입구역
+         *
          *
          * */
+        List<Marker> dummyMarkers = new ArrayList<Marker>();
+        Marker marker1 ;
+        Marker marker2 ;
 
+
+        marker1 = new DummyMarker("인천대학교 학산도서관",37.3751636,126.6339779,81,"");
+        marker2 = new DummyMarker("인천대학교 정보기술대",37.3748073,126.6335562,81,"");
+
+        dummyMarkers.add(marker1);
+        dummyMarkers.add(marker2);
+
+
+
+
+        dataHandlerForMarker.addMarkers(dummyMarkers);
         /**
          * 위에서 생성된 마커들을 선별하여 표시하도록 설정한다.
          * */
 
         dataHandlerForMarker.updateActivateStatus(mainMixedViewContext);
 
-        for(int i = dataHandlerForMarker.getMarkerLisrSize() -1;i>=0;i++){
+        for(int i = dataHandlerForMarker.getMarkerLisrSize() -1;i>=0;i--){
+            Log.e("getmarker",i+"");
             Marker marker = dataHandlerForMarker.getMarker(i);
             if(!frozen){marker.calcPaint(cameraData,addX,addY);}
             marker.draw(dw);

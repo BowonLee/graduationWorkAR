@@ -1,9 +1,10 @@
 package com.example.bowon.graduationworkdebug.DataManagement;
 
 import android.location.Location;
+import android.util.Log;
 
 import com.example.bowon.graduationworkdebug.MainMixedView.MainMixedViewContext;
-import com.example.bowon.graduationworkdebug.Marker;
+import com.example.bowon.graduationworkdebug.marker.Marker;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,11 +27,14 @@ public class DataHandlerForMarker {
     public void addMarkers(List<Marker> markers){
         //인자로 받은 마커들을 추가한다.
         //중복은 방지한다.
+        Log.e("makerlistsize",markers.size()+"");
+
         for(Marker ma:markers){
             if(!markerList.contains(ma)){
                 markerList.add(ma);
             }
         }
+        Log.e("makerlistsize",markers.size()+"");
     }
 
     //내장 정렬 클레스를 이용하여 정렬을 사킨다.
@@ -38,6 +42,7 @@ public class DataHandlerForMarker {
         Collections.sort(markerList);
 
     }
+
 
 
 
