@@ -62,6 +62,8 @@ public class GoogleMapsViewAcrivity extends FragmentActivity implements OnMapRea
         LatLng sydney = new LatLng(37.374648, 126.633253);
         mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Incheon"));
 
+
+
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
        try {
             permissionHelper.LocationCoarsePermission();
