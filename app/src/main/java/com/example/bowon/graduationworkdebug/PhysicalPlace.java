@@ -21,6 +21,7 @@ package com.example.bowon.graduationworkdebug;
 import com.example.bowon.graduationworkdebug.render.MixVector;
 
 import android.location.Location;
+import android.util.Log;
 
 // 물리적 공간 클래스
 /*
@@ -145,7 +146,9 @@ public class PhysicalPlace {
 			x[0] *= -1;
 
 		// 계산된 값을 벡터에 설정
+
 		v.set(x[0], (float) y, z[0]);
+		Log.e("Locationvector",""+x[0]+" s"+(float)y+" "+z[0]);
 	}
 
 	// 벡터값을 위치값으로 바꾸어 줌. Android 의 Location 객체를 이용(?)

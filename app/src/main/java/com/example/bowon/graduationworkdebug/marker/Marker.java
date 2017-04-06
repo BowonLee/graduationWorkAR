@@ -13,7 +13,9 @@ import com.example.bowon.graduationworkdebug.gui.ScreenLine;
 import com.example.bowon.graduationworkdebug.CalculateUtil;
 
 
+import android.graphics.Color;
 import  android.location.Location;
+import android.util.Log;
 
 /**
  * Created by bowon on 2017-03-13.
@@ -166,11 +168,13 @@ abstract public class Marker implements Comparable<Marker>{
         // compute the relative position vector from user position to POI location
         // 유저 위치로부터 POI 위치 까지의 관계 지점의 벡터를 계산한다
         PhysicalPlace.convLocToVec(curGPSFix, mGeoLoc, locationVector);
+
     }
 
     // 그려질 위치를 계산
     public void calcPaint(CameraData viewCam, float addX, float addY) {
         cCMarker(origin, viewCam, addX, addY);	// 카메라 마커를 생성
+        Log.e("calcPaint",""+this.ID+"  "+this.getTitle()+viewCam.width+" "+viewCam.height+" "+viewCam.toString());
         calcV(viewCam);	// 카메라의 고도를 계산
     }
 
@@ -216,17 +220,23 @@ abstract public class Marker implements Comparable<Marker>{
     public void draw(PaintScreen dw) {
         drawCircle(dw);
         drawTextBlock(dw);
+
+        dw.paintText(150,150,"markerobjectDraw",true);
+
     }
 
     // 스크린에 원을 그린다
     public void drawCircle(PaintScreen dw) {
         // 마커가 표시중인 상태일 경우 출력
+        isVisible = true;
         if (isVisible) {
+            Log.e("Marker","Drawcircle"+this.ID+"  "+this.getTitle());
             // 우선 페인트 스크린을 설정한다
             //float maxHeight = Math.round(dw.getHeight() / 10f) + 1;
             float maxHeight = dw.getHeight();
             dw.setStrokeWidth(maxHeight / 100f);
             dw.setFill(false);
+            dw.setColor(Color.RED);
 
             //draw circle with radius depending on distance
             //0.44 is approx. vertical fov in radians
@@ -235,6 +245,7 @@ abstract public class Marker implements Comparable<Marker>{
             //double radius = angle/0.44d * (double)maxHeight;
 
             dw.paintCircle(cMarker.x, cMarker.y, (float)radius);
+
         }
     }
 
@@ -262,7 +273,9 @@ abstract public class Marker implements Comparable<Marker>{
                 250, dw, underline);
 
         // 출력되는 상황일 경우
+        isVisible = true;
         if (isVisible) {
+
             // 데이터 소스에 따른 컬러를 지정
 
             // 현재 각을 얻어온다
@@ -278,6 +291,9 @@ abstract public class Marker implements Comparable<Marker>{
             // 준비된 값으로 객체를 스크린에 그린다
             dw.paintObj(txtLab, signMarker.x - txtLab.getWidth()
                     / 2, signMarker.y + maxHeight, currentAngle + 90, 1);
+
+
+            Log.e("Marker","Drawtext"+this.ID+"  "+this.getTitle()+signMarker.x+" "+signMarker.y+" "+txtLab.getWidth() + " "+maxHeight+ " " + currentAngle);
         }
 
     }

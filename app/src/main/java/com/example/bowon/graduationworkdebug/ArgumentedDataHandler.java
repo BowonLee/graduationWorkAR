@@ -164,22 +164,29 @@ public class ArgumentedDataHandler {
         marker2 = new DummyMarker("인천대학교 정보기술대",37.3748073,126.6335562,81,"");
 
         dummyMarkers.add(marker1);
+
         dummyMarkers.add(marker2);
 
 
 
-
         dataHandlerForMarker.addMarkers(dummyMarkers);
+
         /**
          * 위에서 생성된 마커들을 선별하여 표시하도록 설정한다.
          * */
-
         dataHandlerForMarker.updateActivateStatus(mainMixedViewContext);
 
-        for(int i = dataHandlerForMarker.getMarkerLisrSize() -1;i>=0;i--){
+        for(int i = 0 ;i <=dataHandlerForMarker.getMarkerLisrSize() -1 ;i++){
             Log.e("getmarker",i+"");
+
             Marker marker = dataHandlerForMarker.getMarker(i);
-            if(!frozen){marker.calcPaint(cameraData,addX,addY);}
+            Log.e("getMarker2",""+marker.getTitle());
+
+           // if(!frozen){marker.calcPaint(cameraData,addX,addY);}
+            Log.e("MarkerCameraData",""+cameraData.width+" "+cameraData.height);
+            marker.calcPaint(cameraData,addX,addY);
+
+
             marker.draw(dw);
         }
 

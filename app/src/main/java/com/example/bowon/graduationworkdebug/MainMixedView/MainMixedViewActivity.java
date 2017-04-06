@@ -356,7 +356,7 @@ public class MainMixedViewActivity extends AppCompatActivity implements SensorEv
         //위에서 구한 데이터를 기준으로 각도 계산
         updateOrientationAngles();
 
-
+        argumentedView.postInvalidate();
          //tempText3.setBackgroundColor(Color.WHITE);
 
     }
@@ -436,21 +436,21 @@ public class MainMixedViewActivity extends AppCompatActivity implements SensorEv
        // updateTextview();
         Log.d("location","update");
 
-        //synchronized (mainMixedViewContext.currentLocation){
+        synchronized (mainMixedViewContext.currentLocation){
      //       mainMixedViewContext.currentLocation = location;
-        //}
+        }
         LocationDataUpdate(location);
 
         if(LocationManager.GPS_PROVIDER.equals(location.getProvider())){
            /*
-           *  가장 정확한 위치 제공자인 GPS를 통한 값 만을 받으며
+           *  가장 정확한 위치 제공자인 GPS를 통한 값을 우선해서 받으며
            *  위치 정확도를 유지한다.
            * */
             synchronized (mainMixedViewContext.currentLocation){
                 mainMixedViewContext.currentLocation = location;
             }
 
-            if(argumentedDataHandler.isFrozen()){
+            //if(argumentedDataHandler.isFrozen()){
                 /*이후에 데이터 핸들러의 상태가 정상적이라면 데이터 헨들러를 통해
                 * 자신의 위치 변경을 알린다.
                 * 여기서 위치변경이 알려지면 마커의 거리표시와, 현제 표시할 마커등의 데이터를
@@ -459,12 +459,34 @@ public class MainMixedViewActivity extends AppCompatActivity implements SensorEv
                 *
                 * */
                 argumentedDataHandler.getDataHandlerForMarker().onLocationChanged(location);
-            }
+         //   }
 
             /**
              데이터핸들러 실행 이후 일정 거리가 넘어가면 해당 위치 기준으로 다시
              서버와의 통신을 통해 데이터를 받아야 하므로 거리를 판단하여 재 할당 받는 것 이다.
              * */
+            Location tempLastLocation = mainMixedViewContext.getLocationAtLastDownload();
+            if(tempLastLocation == null) {
+                /*만일 현제 데이터 핸들러 상의 위치정보가 없다면 (오류나 최초실행의 경우)
+                * 현제 위치를 등록해준다.
+                * */
+                mainMixedViewContext.setLocationAtLastDownload(location);
+            }else{
+                float threshold = argumentedDataHandler.getRadius()*1000f/3f;
+                if(location.distanceTo(tempLastLocation)>threshold){
+                    argumentedDataHandler.doStart();
+
+                }
+                /*gps가 현제 사용 가능한 상태라는 것을 알려준다.*/
+                isGpsProviderEnable = true;
+            }
+
+        }else{
+            mainMixedViewContext.currentLocation = location;
+            if (argumentedDataHandler.isFrozen()){
+                argumentedDataHandler.getDataHandlerForMarker().onLocationChanged(location);
+            }
+
             Location tempLastLocation = mainMixedViewContext.getLocationAtLastDownload();
             if(tempLastLocation == null) {
                 /*만일 현제 데이터 핸들러 상의 위치정보가 없다면 (오류나 최초실행의 경우)

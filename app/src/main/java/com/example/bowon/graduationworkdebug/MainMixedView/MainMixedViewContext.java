@@ -5,6 +5,7 @@ import android.content.ContextWrapper;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationManager;
+import android.widget.Toast;
 
 import com.example.bowon.graduationworkdebug.PermissionHelper;
 import com.example.bowon.graduationworkdebug.render.Matrix;
@@ -75,11 +76,22 @@ public class MainMixedViewContext extends ContextWrapper {
             locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
 
             /*우선 자신의 위치를 GPS로 받아보고 GPS수신이 어려울 경우 NetworkProvider를 사용해 받는다. */
-            Location lastFIxLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 
-            if(lastFIxLocation == null){
-                lastFIxLocation = locationManager.getLastKnownLocation(locationManager.NETWORK_PROVIDER);
+
+            Location lastFIxLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            if(!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
+                if(lastFIxLocation == null){
+                    lastFIxLocation = locationManager.getLastKnownLocation(locationManager.NETWORK_PROVIDER);
+                    Toast.makeText(this,"NetworkProvider",Toast.LENGTH_SHORT);
+                }
+            }else{
+                Toast.makeText(this,"GPSProvider",Toast.LENGTH_SHORT);
+
+
             }
+
+
+
 
             /*만일 자신의 위치를 받아온 기록이 있을 시 그것을 이용하되 위치를 받고 시간이 너무 오래 날 경우 정확도가 없음을 알린다. */
             if (lastFIxLocation != null){

@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
+import com.example.bowon.graduationworkdebug.DataManagement.DataHandlerForMarker;
 import com.example.bowon.graduationworkdebug.MainMixedView.MainMixedViewActivity;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -14,11 +15,26 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+
+
+/*
+* 지도가 그려져있는 부분이다.
+*
+* */
 public class GoogleMapsViewAcrivity extends FragmentActivity implements OnMapReadyCallback{
+
+    /*
+    * 전역적으로 사용 될 증강 데이터 핸들러
+    * */
+    //public static DataHandlerForMarker staticDataHandlerForMarker;
+
+
 
     private GoogleMap mMap;
     Button viewChangeButton;
     PermissionHelper permissionHelper;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,18 +75,22 @@ public class GoogleMapsViewAcrivity extends FragmentActivity implements OnMapRea
         mMap = googleMap;
 
         // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(37.374648, 126.633253);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Incheon"));
+        LatLng sydney = new LatLng(37.3751636,126.6339779);
+        LatLng sydney2 = new LatLng(37.3748073,126.6335562);
+        mMap.addMarker(new MarkerOptions().position(sydney).title("학산도서관"));
+        mMap.addMarker(new MarkerOptions().position(sydney2).title("정보기술대"));
 
 
 
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+
        try {
             permissionHelper.LocationCoarsePermission();
             mMap.setMyLocationEnabled(true);
         }catch (SecurityException e){
             e.printStackTrace();
         }
+
 
     }
 }

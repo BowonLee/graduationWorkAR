@@ -8,6 +8,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 
 /**
@@ -42,7 +43,9 @@ public class AugmentedView extends View {
         MainMixedViewActivity.dWindow.setCanvas(canvas);
 
         if(!MainMixedViewActivity.argumentedDataHandler.isInit()){
+            Log.e("WindowWH",""+MainMixedViewActivity.dWindow.getWidth()+ " "+MainMixedViewActivity.dWindow.getHeight());
             MainMixedViewActivity.argumentedDataHandler.init(MainMixedViewActivity.dWindow.getWidth(),MainMixedViewActivity.dWindow.getHeight());
+
         }
 
         MainMixedViewActivity.argumentedDataHandler.draw(MainMixedViewActivity.dWindow);
