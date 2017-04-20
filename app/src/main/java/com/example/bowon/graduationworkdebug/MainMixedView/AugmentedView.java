@@ -2,12 +2,6 @@ package com.example.bowon.graduationworkdebug.MainMixedView;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 
@@ -37,18 +31,18 @@ public class AugmentedView extends View {
         super.onDraw(canvas);
 
 
-        MainMixedViewActivity.dWindow.setWidth(canvas.getWidth());
-        MainMixedViewActivity.dWindow.setHeight(canvas.getHeight());
+        MixedViewActivity.dWindow.setWidth(canvas.getWidth());
+        MixedViewActivity.dWindow.setHeight(canvas.getHeight());
 
-        MainMixedViewActivity.dWindow.setCanvas(canvas);
+        MixedViewActivity.dWindow.setCanvas(canvas);
 
-        if(!MainMixedViewActivity.argumentedDataHandler.isInit()){
-            Log.e("WindowWH",""+MainMixedViewActivity.dWindow.getWidth()+ " "+MainMixedViewActivity.dWindow.getHeight());
-            MainMixedViewActivity.argumentedDataHandler.init(MainMixedViewActivity.dWindow.getWidth(),MainMixedViewActivity.dWindow.getHeight());
+        if(!MixedViewActivity.argumentedDataHandler.isInit()){
+            Log.e("WindowWH",""+ MixedViewActivity.dWindow.getWidth()+ " "+ MixedViewActivity.dWindow.getHeight());
+            MixedViewActivity.argumentedDataHandler.init(MixedViewActivity.dWindow.getWidth(), MixedViewActivity.dWindow.getHeight());
 
         }
 
-        MainMixedViewActivity.argumentedDataHandler.draw(MainMixedViewActivity.dWindow);
+        MixedViewActivity.argumentedDataHandler.draw(MixedViewActivity.dWindow);
 
     }
 

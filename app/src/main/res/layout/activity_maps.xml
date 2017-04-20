@@ -15,12 +15,14 @@ android:layout_height="match_parent"
 tools:context="com.example.bowon.graduationworkdebug.GoogleMapsViewAcrivity" />
 
     <Button
-        android:text="Button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="100dp"
+        android:layout_height="75dp"
         android:id="@+id/button_for_changeviewtype_camera"
+        android:background="@drawable/btn_goto_camera"
         android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:visibility="visible" />
+
 </RelativeLayout>
 
 

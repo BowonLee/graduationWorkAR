@@ -27,6 +27,8 @@ import android.util.Log;
 
 abstract public class Marker implements Comparable<Marker>{
 
+    private final int circleSize = 20;
+
     private String ID;	// ID값
     protected String title;	// 타이틀
     private boolean underline = false;	// 밑줄 여부
@@ -34,6 +36,7 @@ abstract public class Marker implements Comparable<Marker>{
     protected PhysicalPlace mGeoLoc;	// 물리적 공간 객체. 실제 장소값을 저장
     // 유저와 물리적 공간 간의 거리(미터 단위)
     protected double distance;
+
 
     private boolean active;	// 활성화 여부
 
@@ -128,9 +131,7 @@ abstract public class Marker implements Comparable<Marker>{
 
     // 고도를 계산. 이제는 쓰이지 않는듯?
     private void calcV(CameraData viewCam) {
-        isVisible = false;	// 일단 보이지 않는 상태로 만들고
-//		isLookingAt = false;
-//		deltaCenter = Float.MAX_VALUE;
+        isVisible = false;	// 해당 마커가 현제 보이는지 판단
 
         // 마커의 z 값에 따른 처리를 한다
         if (cMarker.z < -1f) {
@@ -232,11 +233,11 @@ abstract public class Marker implements Comparable<Marker>{
         if (isVisible) {
             Log.e("Marker","Drawcircle"+this.ID+"  "+this.getTitle());
             // 우선 페인트 스크린을 설정한다
-            //float maxHeight = Math.round(dw.getHeight() / 10f) + 1;
             float maxHeight = dw.getHeight();
             dw.setStrokeWidth(maxHeight / 100f);
             dw.setFill(false);
             dw.setColor(Color.RED);
+
 
             //draw circle with radius depending on distance
             //0.44 is approx. vertical fov in radians
@@ -244,7 +245,7 @@ abstract public class Marker implements Comparable<Marker>{
             double radius = Math.max(Math.min(angle/0.44 * maxHeight, maxHeight),maxHeight/25f);
             //double radius = angle/0.44d * (double)maxHeight;
 
-            dw.paintCircle(cMarker.x, cMarker.y, (float)radius);
+            dw.paintCircle(cMarker.x, cMarker.y, 80);
 
         }
     }

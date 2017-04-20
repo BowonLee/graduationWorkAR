@@ -47,7 +47,6 @@ public class CalculateUtil {
         float angle = (float) Math.toDegrees(Math.acos(cos));
 
         angle = (tmpv_y < 0) ? angle * -1 : angle;
-
         return angle;
     }
 }

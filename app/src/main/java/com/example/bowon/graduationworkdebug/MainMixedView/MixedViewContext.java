@@ -27,10 +27,10 @@ import java.util.Random;
 * */
 
 
-public class MainMixedViewContext extends ContextWrapper {
+public class MixedViewContext extends ContextWrapper {
 
     Context context;
-    public MainMixedViewActivity mainMixedViewActivity;
+    public MixedViewActivity mainMixedViewActivity;
     Random rand;// 헤쉬값 계산을 위한 난수발생함수
 
     Location currentLocation;
@@ -51,15 +51,15 @@ public class MainMixedViewContext extends ContextWrapper {
     /*생성자 에서는 자신의 위치를 provider를 이용해 받아오고
     * 받은 자신의 위치가 믿을만한지 아닌지까지 판단하여 Flag변수로 알려준다.
     * */
-    MainMixedViewContext(Context context){
+    MixedViewContext(Context context){
         super(context);
 
         /*뷰와 context를 할당 받는다.*/
 
        this.context = context;
-        mainMixedViewActivity = (MainMixedViewActivity)context;
+        mainMixedViewActivity = (MixedViewActivity)context;
 
-        SharedPreferences sharedSettings = getSharedPreferences(MainMixedViewActivity.PREFS_CODE,0);
+        SharedPreferences sharedSettings = getSharedPreferences(MixedViewActivity.PREFS_CODE,0);
 
         /*
         * 원래 데이터 소스를 통해 데이터를 필터링하는 기능이 있어 해당 내용에 대한

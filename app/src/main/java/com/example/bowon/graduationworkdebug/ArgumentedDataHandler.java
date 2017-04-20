@@ -8,8 +8,8 @@ import android.location.Location;
 import android.util.Log;
 
 import com.example.bowon.graduationworkdebug.DataManagement.DataHandlerForMarker;
-import com.example.bowon.graduationworkdebug.MainMixedView.MainMixedViewContext;
-import com.example.bowon.graduationworkdebug.MainMixedView.MainMixedViewState;
+import com.example.bowon.graduationworkdebug.MainMixedView.MixedViewContext;
+import com.example.bowon.graduationworkdebug.MainMixedView.MixedViewState;
 import com.example.bowon.graduationworkdebug.gui.PaintScreen;
 import com.example.bowon.graduationworkdebug.marker.DummyMarker;
 import com.example.bowon.graduationworkdebug.marker.Marker;
@@ -28,7 +28,7 @@ import java.util.List;
  * */
 public class ArgumentedDataHandler {
     //현제 context
-    private MainMixedViewContext mainMixedViewContext;
+    private MixedViewContext mainMixedViewContext;
     //뷰의 초기 셋팅 여부 - 증강된 뷰는 셋팅이 이루어진 이후 처리가 이루어진다.
     //하지만 이 셋팅은 이미 되어 있으면 다시 할 필요가 없기에 리소스의 낭비방지를 위해 셋팅여부확인을 한다.
     private boolean isInit;
@@ -38,7 +38,7 @@ public class ArgumentedDataHandler {
     /*카메라 객체를 다루고 있다.*/
     private CameraData cameraData;
 
-    private MainMixedViewState mainMixedViewState = new MainMixedViewState();
+    private MixedViewState mainMixedViewState = new MixedViewState();
 
     /*디버그 목적으로 뷰를 얼리는 기능을 위해 */
     private boolean frozen;
@@ -64,10 +64,10 @@ public class ArgumentedDataHandler {
 
     // 객체상태의 설정 및 생성자, 상태리턴을 위한 부분들이다.
     //생성자
-    public ArgumentedDataHandler(MainMixedViewContext context){this.mainMixedViewContext =context;}
+    public ArgumentedDataHandler(MixedViewContext context){this.mainMixedViewContext =context;}
 
     //메인뷰의 컨텍스트를 리턴한다.
-    public MainMixedViewContext getMainMixedViewContext(){return  mainMixedViewContext;}
+    public MixedViewContext getMainMixedViewContext(){return  mainMixedViewContext;}
 
     //런쳐? 의 시작여부를 리턴한다.
     public boolean isLauncherStarted(){return isLauncherStarted;}
@@ -94,7 +94,7 @@ public class ArgumentedDataHandler {
     public void doStart(){
         //상태를 지정한다
         //현제의 위치를 마지막 다운로드 위치로 설정한다. 즉 , 현제의 위치를 등록한다.
-        mainMixedViewState.nextStatus = MainMixedViewState.NOT_STARTED;
+        mainMixedViewState.nextStatus = MixedViewState.NOT_STARTED;
         mainMixedViewContext.setLocationAtLastDownload(currentFixLocation);
     }
 
@@ -161,13 +161,10 @@ public class ArgumentedDataHandler {
 
 
         marker1 = new DummyMarker("인천대학교 학산도서관",37.3751636,126.6339779,81,"");
-        marker2 = new DummyMarker("인천대학교 정보기술대",37.3748073,126.6335562,81,"");
+        marker2 = new DummyMarker("부천역",37.484322,126.782747,0,"");
 
         dummyMarkers.add(marker1);
-
         dummyMarkers.add(marker2);
-
-
 
         dataHandlerForMarker.addMarkers(dummyMarkers);
 
@@ -191,7 +188,7 @@ public class ArgumentedDataHandler {
         }
 
         /*이후 레이더를 그리거나 이벤트들을 설정한다.*/
-        mainMixedViewState.nextStatus = MainMixedViewState.PROCESSING;// 처리중 설정
+        mainMixedViewState.nextStatus = MixedViewState.PROCESSING;// 처리중 설정
     }
 
 

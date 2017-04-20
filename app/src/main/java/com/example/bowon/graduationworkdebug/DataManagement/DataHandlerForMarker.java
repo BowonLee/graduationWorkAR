@@ -3,7 +3,7 @@ package com.example.bowon.graduationworkdebug.DataManagement;
 import android.location.Location;
 import android.util.Log;
 
-import com.example.bowon.graduationworkdebug.MainMixedView.MainMixedViewContext;
+import com.example.bowon.graduationworkdebug.MainMixedView.MixedViewContext;
 import com.example.bowon.graduationworkdebug.marker.Marker;
 
 import java.util.ArrayList;
@@ -47,7 +47,7 @@ public class DataHandlerForMarker {
 
 
 
-    public void updateActivateStatus(MainMixedViewContext context){
+    public void updateActivateStatus(MixedViewContext context){
         /*
         * 마커들의 활성화 상태를 지정해주는 메소드이다.
         * 마커들의 활성화 조건은 옵션클레스 정의 이후에야 만들어진다.

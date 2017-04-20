@@ -16,14 +16,14 @@ import com.example.bowon.graduationworkdebug.render.MixVector;
 * 이후 구조 파악이 진행되면 추가적인 리펙토링이 필요할 것 같다.
 * 일단 함수호출은 Marker와 Datahandler에서 이루어진다.
 * */
-public class MainMixedViewState {
+public class MixedViewState {
 
     public static int NOT_STARTED = 0;
     public static int PROCESSING = 1;
     public static int READY = 2;
     public static int DONE = 3;
 
-    public int nextStatus = MainMixedViewState.NOT_STARTED;
+    public int nextStatus = MixedViewState.NOT_STARTED;
 
     private float currentBearing;
     private float currentPitch;
@@ -31,7 +31,7 @@ public class MainMixedViewState {
     //Detail뷰가 뭔지 잘 모르겠다 일단 해놓고 나중에 분석해봐야겠다.
     private boolean detailsView;
 
-    public boolean handleEvent(MainMixedViewContext context,String onPress ) {
+    public boolean handleEvent(MixedViewContext context, String onPress ) {
         //데이터랜들러 - 마커 - 마커 클릭시 이벤트 처리의 일부분
         //원래는 웹페이지를 파싱하였다.
 

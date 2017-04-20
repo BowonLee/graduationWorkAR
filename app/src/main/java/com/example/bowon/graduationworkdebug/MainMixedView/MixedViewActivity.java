@@ -1,9 +1,9 @@
 package com.example.bowon.graduationworkdebug.MainMixedView;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.hardware.GeomagneticField;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -27,16 +27,17 @@ import android.widget.Toast;
 import com.example.bowon.graduationworkdebug.ArgumentedDataHandler;
 import com.example.bowon.graduationworkdebug.Datatype.LocationCoordinate;
 import com.example.bowon.graduationworkdebug.GetAddress;
-import com.example.bowon.graduationworkdebug.GoogleMapsViewAcrivity;
 import com.example.bowon.graduationworkdebug.PermissionHelper;
 import com.example.bowon.graduationworkdebug.R;
 import com.example.bowon.graduationworkdebug.gui.PaintScreen;
 import com.example.bowon.graduationworkdebug.render.Matrix;
 
-public class MainMixedViewActivity extends AppCompatActivity implements SensorEventListener, LocationListener{
+import java.util.List;
+
+public class MixedViewActivity extends AppCompatActivity implements SensorEventListener, LocationListener{
 
     /*Log용 태그*/
-    private static final String TAG = "MainMixedViewActivity";
+    private static final String TAG = "MixedViewActivity";
     /**
      * 이전 데이터 표시들을 위해 임시로 사용하는 UI
      * */
@@ -67,8 +68,8 @@ public class MainMixedViewActivity extends AppCompatActivity implements SensorEv
     private boolean isInited = false;
 
     /*메인뷰를 서포트하기 위한 뷰들*/
-    private MainMixedViewContext mainMixedViewContext;
-    private MainMixedViewState mainMixedViewState;
+    private MixedViewContext mainMixedViewContext;
+    private MixedViewState mainMixedViewState;
     static ArgumentedDataHandler argumentedDataHandler;
 
     /*카메라 프리뷰 사용을 위한 설정*/
@@ -82,7 +83,9 @@ public class MainMixedViewActivity extends AppCompatActivity implements SensorEv
     private SensorManager sensorManager;
     private Sensor sensorAccelerometer;
     private Sensor sensorGeoScope;
+    private List<Sensor> sensors;
     private Sensor sensorRotationVector;
+
     private boolean isGpsProviderEnable;
 
     LocationManager locationManager;
@@ -109,6 +112,13 @@ public class MainMixedViewActivity extends AppCompatActivity implements SensorEv
     private PowerManager.WakeLock mWakeLock;
     /*private*/
 
+
+
+    double angleX,angleY;
+    float Rot[] = new float[9];
+    float I[] = new float[9];
+
+
     //위치정보
     LocationCoordinate locationCoordinate;
     @Override
@@ -123,16 +133,16 @@ public class MainMixedViewActivity extends AppCompatActivity implements SensorEv
         mapChangeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                /*Intent intent = new Intent(MainMixedViewActivity.this, GoogleMapsViewAcrivity.class);
+                /*Intent intent = new Intent(MixedViewActivity.this, GoogleMapsViewAcrivity.class);
                 startActivity(intent);*/
-                MainMixedViewActivity.this.finish();
+                MixedViewActivity.this.finish();
 
             }
         });
 
         /*자체 센서 메니저 사용을 휘해 설정*/
         locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
-        sensorManager = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
+
         /*추후 웨이크락 사용시 사용*/
 
 
@@ -153,7 +163,7 @@ public class MainMixedViewActivity extends AppCompatActivity implements SensorEv
         addContentView(argumentedView, new ActionBar.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT, ActionBar.LayoutParams.MATCH_PARENT));
 
         if(!isInited){
-            mainMixedViewContext = new MainMixedViewContext(this);
+            mainMixedViewContext = new MixedViewContext(this);
             // 서버로부터 다운로드를 할 다운로드 관리자 설정
             dWindow = new PaintScreen();
             argumentedDataHandler = new ArgumentedDataHandler(mainMixedViewContext);
@@ -166,9 +176,7 @@ public class MainMixedViewActivity extends AppCompatActivity implements SensorEv
         }
 
 
-        sensorAccelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        sensorGeoScope = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
-       // sensorRotationVector = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+      // sensorRotationVector = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
 
         /*geocodeing 사용을 위한 geocode 객체*/
         getAddress = new GetAddress(this);
@@ -182,7 +190,7 @@ public class MainMixedViewActivity extends AppCompatActivity implements SensorEv
     * matrix 1~3을 각각 삼각행렬을 설정시켜놓고 matrix4를 기준행렬로 만들어 놓는다.
     * */
     private void setViewAngleMatrix(){
-        double angleX,angleY;
+
         angleX = Math.toRadians(-90);
         matrix1.set(1f, 0f, 0f, 0f, (float) Math.cos(angleX), (float) -Math
                 .sin(angleX), 0f, (float) Math.sin(angleX), (float) Math
@@ -217,10 +225,23 @@ public class MainMixedViewActivity extends AppCompatActivity implements SensorEv
         mainMixedViewContext.mainMixedViewActivity = this;
         argumentedDataHandler.doStart();
 
+
         /*ViewAngle설정을 위해 사용*/
        setViewAngleMatrix();
 
+        sensorManager = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
+
+        sensors = sensorManager.getSensorList(Sensor.TYPE_ACCELEROMETER);
+        if(sensors.size()>0){
+            sensorAccelerometer = sensors.get(0);
+        }
+        sensors = sensorManager.getSensorList(Sensor.TYPE_MAGNETIC_FIELD);
+        if(sensors.size()>0){
+            sensorGeoScope = sensors.get(0);
+        }
+
         /* 지자기센서와 가속도센서 등록*/
+
         sensorManager.registerListener(this, sensorAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
         sensorManager.registerListener(this, sensorGeoScope, SensorManager.SENSOR_DELAY_NORMAL);
 
@@ -258,6 +279,22 @@ public class MainMixedViewActivity extends AppCompatActivity implements SensorEv
         }catch (SecurityException e){
             Log.d("Exception","security");
         }
+
+        GeomagneticField geomagneticField = new GeomagneticField((float)mainMixedViewContext.currentLocation.getLatitude(),
+                (float)mainMixedViewContext.getCurrentLocation().getLongitude(),(float)mainMixedViewContext.currentLocation.getAltitude(),
+                System.currentTimeMillis());
+
+        angleY = Math.toRadians(-geomagneticField.getDeclination());
+        matrix4.set((float) Math.cos(angleY), 0f,
+                (float) Math.sin(angleY), 0f, 1f, 0f, (float) -Math
+                        .sin(angleY), 0f, (float) Math.cos(angleY)
+        );
+        mainMixedViewContext.declination = geomagneticField.getDeclination();
+
+
+        /**
+         * 다운로드 쓰레드 활성화
+         */
 
         updateTextview();
         camera2Preview.onResume();
@@ -345,18 +382,26 @@ public class MainMixedViewActivity extends AppCompatActivity implements SensorEv
 
         //0 : 방위각 z 1 : 피치(x) 2:롤(y)
        if(event.sensor.getType() == Sensor.TYPE_ACCELEROMETER){
-        System.arraycopy(event.values,0,mAccelerometerReading,0,mAccelerometerReading.length);
+           mAccelerometerReading[0] = event.values[0];
+           mAccelerometerReading[1] = event.values[1];
+           mAccelerometerReading[2] = event.values[2];
+
         /*증강뷰에 변경을 알려야함*/
+           argumentedView.postInvalidate();
        }else if(event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD){
-           System.arraycopy(event.values,0,mMagnetometerReading,0,mMagnetometerReading.length);
+        //   System.arraycopy(event.values,0,mMagnetometerReading,0,mMagnetometerReading.length);
+           mMagnetometerReading[0] = event.values[0];
+           mMagnetometerReading[1] = event.values[1];
+           mMagnetometerReading[2] = event.values[2];
        /*여기도*/
+           argumentedView.postInvalidate();
        }
+
 
 
         //위에서 구한 데이터를 기준으로 각도 계산
         updateOrientationAngles();
 
-        argumentedView.postInvalidate();
          //tempText3.setBackgroundColor(Color.WHITE);
 
     }
@@ -366,11 +411,9 @@ public class MainMixedViewActivity extends AppCompatActivity implements SensorEv
     /*잘 모르겠다. 나중에 삼각변환행렬 학습 이후에야 조금 알 수 있을 것 같다.*/
     private void updateOrientationAngles(){
 
-        float Rot[] = new float[9];
-        float I[] = new float[9];
 
         // 메트릭스 데이터
-        sensorManager.getRotationMatrix(mRotationMatrix,null,mAccelerometerReading,mMagnetometerReading);
+        sensorManager.getRotationMatrix(mRotationMatrix,I,mAccelerometerReading,mMagnetometerReading);
 
         sensorManager.remapCoordinateSystem(mRotationMatrix,SensorManager.AXIS_X,SensorManager.AXIS_MINUS_Z,Rot);
 
@@ -404,9 +447,7 @@ public class MainMixedViewActivity extends AppCompatActivity implements SensorEv
         synchronized (mainMixedViewContext.rotationMatrix) {
             mainMixedViewContext.rotationMatrix.set(smoothR);
         }
-        tempText3.setText("방위 : "+Math.toDegrees(mOrientationAngles[0])+
-                "\n상하경사 : "+Math.toDegrees(mOrientationAngles[1])+"\n좌우경사 : "+
-                Math.toDegrees(mOrientationAngles[2]));
+
 
         // 방위각도데이터
         // sensorManager.getOrientation(mRotationMatrix,mOrientationAngles);
@@ -436,10 +477,7 @@ public class MainMixedViewActivity extends AppCompatActivity implements SensorEv
        // updateTextview();
         Log.d("location","update");
 
-        synchronized (mainMixedViewContext.currentLocation){
-     //       mainMixedViewContext.currentLocation = location;
-        }
-        LocationDataUpdate(location);
+
 
         if(LocationManager.GPS_PROVIDER.equals(location.getProvider())){
            /*
@@ -475,6 +513,7 @@ public class MainMixedViewActivity extends AppCompatActivity implements SensorEv
                 float threshold = argumentedDataHandler.getRadius()*1000f/3f;
                 if(location.distanceTo(tempLastLocation)>threshold){
                     argumentedDataHandler.doStart();
+                    Log.d(TAG,"Restarting download due to location change");
 
                 }
                 /*gps가 현제 사용 가능한 상태라는 것을 알려준다.*/
@@ -482,10 +521,14 @@ public class MainMixedViewActivity extends AppCompatActivity implements SensorEv
             }
 
         }else{
-            mainMixedViewContext.currentLocation = location;
-            if (argumentedDataHandler.isFrozen()){
-                argumentedDataHandler.getDataHandlerForMarker().onLocationChanged(location);
+            synchronized (mainMixedViewContext.currentLocation){
+                mainMixedViewContext.currentLocation = location;
             }
+
+            // mainMixedViewContext.currentLocation = location;
+            //if (argumentedDataHandler.isFrozen()){
+                argumentedDataHandler.getDataHandlerForMarker().onLocationChanged(location);
+          //  }
 
             Location tempLastLocation = mainMixedViewContext.getLocationAtLastDownload();
             if(tempLastLocation == null) {
@@ -506,7 +549,7 @@ public class MainMixedViewActivity extends AppCompatActivity implements SensorEv
         }
 
 
-
+        LocationDataUpdate(location);
         updateTextview();
 
 

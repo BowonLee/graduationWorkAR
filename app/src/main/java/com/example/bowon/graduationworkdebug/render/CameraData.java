@@ -59,17 +59,11 @@ public class CameraData {
 				/ (float) Math.tan(viewAngle / 2);
 	}
 
-	// 뷰의 각도를 설정. 넓이와 높이도 함께 인자로 받는다
-	public void setViewAngle(int width, int height, float viewAngle) {
-		// 값 설정은 위와 동일
-		this.viewAngle = viewAngle;
-		this.dist = (width / 2) / (float) Math.tan(viewAngle / 2);
-	}
 
 	// 사영점을 설정(벡터 사영)
 	// 인자값으로는 본점(origin)과 투영점(dest), 투영점 계산에 사용될 x,y 값을 받음 
 	public void projectPoint(MixVector orgPoint, MixVector prjPoint, float addX,
-			float addY) {
+							 float addY) {
 		prjPoint.x = dist * orgPoint.x / -orgPoint.z;
 		prjPoint.y = dist * orgPoint.y / -orgPoint.z;
 		prjPoint.z = orgPoint.z;
