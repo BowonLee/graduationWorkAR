@@ -35,15 +35,18 @@ public class PermissionHelper {
     //위치정보 퍼미션
     public boolean LocationPermission() {
         permissionCheck = ContextCompat.checkSelfPermission(currentActivity, Manifest.permission.ACCESS_FINE_LOCATION);
-        if (permissionCheck == PackageManager.PERMISSION_DENIED) {
-            // 권한없음
-               //권한 요청
-                ActivityCompat.requestPermissions((Activity) currentActivity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_ACCESS__FINE);
-                Log.d("LocationPermission", "apply");
-                return true;
-        }else {
-            // 권한있음
-            Log.d("LocationPermission", "already");
+        if(permissionCheck != PackageManager.PERMISSION_GRANTED){
+            //권한 없음
+            if(ActivityCompat.shouldShowRequestPermissionRationale((Activity) currentActivity, Manifest.permission.ACCESS_FINE_LOCATION)){
+            }else{
+                ActivityCompat.requestPermissions((Activity) currentActivity,new String[]{Manifest.permission.ACCESS_FINE_LOCATION}
+                        ,LOCATION_ACCESS__FINE);
+            }
+            Log.d("LocationCoarse","apply");
+            return true;
+        }else{
+            Log.d("LocationCoarse","already");
+
         }
         return false;
     }
@@ -51,9 +54,12 @@ public class PermissionHelper {
     //카메라 퍼미션
     public boolean CameraPermission(){
         permissionCheck = ContextCompat.checkSelfPermission(currentActivity,Manifest.permission.CAMERA);
-        if(permissionCheck == PackageManager.PERMISSION_DENIED){
+        if(permissionCheck != PackageManager.PERMISSION_GRANTED){
             //권한 없음
-           ActivityCompat.requestPermissions((Activity) currentActivity,new String[]{Manifest.permission.CAMERA},CAMERA_PERMISSION);
+            if(ActivityCompat.shouldShowRequestPermissionRationale((Activity) currentActivity, Manifest.permission.CAMERA)){
+            }else{
+                ActivityCompat.requestPermissions((Activity) currentActivity,new String[]{Manifest.permission.CAMERA},CAMERA_PERMISSION);
+            }
                 Log.d("CameraPermission","apply");
             return true;
         }else{
@@ -65,15 +71,18 @@ public class PermissionHelper {
 
     public boolean LocationCoarsePermission() {
         permissionCheck = ContextCompat.checkSelfPermission(currentActivity, Manifest.permission.ACCESS_COARSE_LOCATION);
-        if (permissionCheck == PackageManager.PERMISSION_DENIED) {
-            // 권한없음
-            //권한 요청
-            ActivityCompat.requestPermissions((Activity) currentActivity, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, LOCATION_ACCESS_COARSE);
-            Log.d("LocationCPermission", "apply");
+        if(permissionCheck != PackageManager.PERMISSION_GRANTED){
+            //권한 없음
+            if(ActivityCompat.shouldShowRequestPermissionRationale((Activity) currentActivity, Manifest.permission.ACCESS_COARSE_LOCATION)){
+            }else{
+                ActivityCompat.requestPermissions((Activity) currentActivity,new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}
+                        ,LOCATION_ACCESS_COARSE);
+            }
+            Log.d("LocationCoarse","apply");
             return true;
-        }else {
-            // 권한있음
-            Log.d("LocationCPermission", "already");
+        }else{
+            Log.d("LocationCoarse","already");
+
         }
         return false;
     }

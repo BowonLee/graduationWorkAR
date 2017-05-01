@@ -212,7 +212,7 @@ public class Camera2Preview extends Thread {
          Log.d(TAG,"onResume");
          if(textureView.isAvailable()){
              transformImage(textureView.getWidth(),textureView.getHeight());
-             openCamera();
+
          }
          setSurfaceTextureListener();
 
