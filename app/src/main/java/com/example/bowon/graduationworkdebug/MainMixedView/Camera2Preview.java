@@ -1,7 +1,10 @@
 package com.example.bowon.graduationworkdebug.MainMixedView;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Camera;
+import android.graphics.Matrix;
+import android.graphics.RectF;
 import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
@@ -14,12 +17,13 @@ import android.hardware.camera2.params.StreamConfigurationMap;
 import android.nfc.Tag;
 import android.os.HandlerThread;
 import android.service.media.CameraPrewarmService;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.util.Size;
 import android.view.Surface;
-import android.view.TextureView;
 import android.widget.Toast;
 
+import com.example.bowon.graduationworkdebug.AutoFitTextureView;
 import com.example.bowon.graduationworkdebug.PermissionHelper;
 
 import java.util.Arrays;
@@ -39,25 +43,29 @@ public class Camera2Preview extends Thread {
     // camera2 구현
     final String TAG = "Camera2Preview : ";
 
-    private TextureView textureView;
+    private AutoFitTextureView textureView;
     private Context context;
     private CameraDevice cameraDevice;
     private CaptureRequest.Builder previewBuilder;
     private CameraCaptureSession previewSession;
     private Size previewSize;
     PermissionHelper permissionHelper;
+    private MixedViewActivity mixedViewActivity;
 
 
 
-
-    public Camera2Preview(Context context, TextureView textureView){
+    public Camera2Preview(Context context, AutoFitTextureView textureView){
         this.textureView = textureView;
         this.context = context;
+        mixedViewActivity = (MixedViewActivity)context;
 
     }
 
-
+    public void setCameraDevice(CameraDevice cameraDevice) {
+        this.cameraDevice = cameraDevice;
+    }
     private String getBackFacingCameraId(CameraManager cameraManager){
+        /*후면 카메라를 사용하도록 설정한다*/
         try{
             for(final String cameraId : cameraManager.getCameraIdList()){
                  CameraCharacteristics cameraCharacteristics = cameraManager.getCameraCharacteristics(cameraId);
@@ -70,12 +78,17 @@ public class Camera2Preview extends Thread {
         return null;
     }
 
-    public void openCamera(){
+    public void openCamera(int width,int height){
         CameraManager cameraManager = (CameraManager)context.getSystemService(Context.CAMERA_SERVICE);
+
+
+        configureTransform(width, height);
         try{
             String cameraId = getBackFacingCameraId(cameraManager);
             CameraCharacteristics cameraCharacteristics = cameraManager.getCameraCharacteristics(cameraId);
+
             StreamConfigurationMap streamConfigurationMap = cameraCharacteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+
             previewSize = streamConfigurationMap.getOutputSizes(SurfaceTexture.class)[0];
 
 
@@ -94,34 +107,34 @@ public class Camera2Preview extends Thread {
 
     }
 
-    private TextureView.SurfaceTextureListener surfaceTextureListener = new TextureView.SurfaceTextureListener() {
-        @Override
+    private AutoFitTextureView.SurfaceTextureListener surfaceTextureListener = new AutoFitTextureView.SurfaceTextureListener() {
+
         public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
-            openCamera();
+           configureTransform(width,height);
+            openCamera(width,height);
         }
 
-        @Override
+
         public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
-
+            configureTransform(width,height);
         }
 
-        @Override
+
         public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
             return false;
         }
 
-        @Override
         public void onSurfaceTextureUpdated(SurfaceTexture surface) {
-
+              //  updatePreview();
         }
     };
 
 
     private  CameraDevice.StateCallback stateCallback = new CameraDevice.StateCallback() {
         @Override
-        public void onOpened(CameraDevice camera) {
+        public void onOpened( CameraDevice cameraDevice) {
             Log.d(TAG,"onOpen");
-            cameraDevice = camera;
+            setCameraDevice(cameraDevice);
             startPreview();
         }
 
@@ -197,7 +210,12 @@ public class Camera2Preview extends Thread {
 
      public void onResume(){
          Log.d(TAG,"onResume");
+         if(textureView.isAvailable()){
+             transformImage(textureView.getWidth(),textureView.getHeight());
+             openCamera();
+         }
          setSurfaceTextureListener();
+
      }
     private Semaphore cameraOpenCloseLock = new Semaphore(1);
 
@@ -218,5 +236,54 @@ public class Camera2Preview extends Thread {
         }
     }
 
+    private void transformImage (int width, int height) {
+        if (previewSize == null || textureView == null) {
+            return;
+        }
+        Matrix matrix = new Matrix();
+
+        int rotation = mixedViewActivity.getWindowManager().getDefaultDisplay().getRotation();
+        RectF textureRectF = new RectF(0, 0, width, height);
+        RectF previewRectF = new RectF(0, 0, previewSize.getHeight(), previewSize.getWidth());
+        float centerX = textureRectF.centerX();
+        float centery = textureRectF.centerY();
+
+        if (rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_270) {
+        } else if (rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_270) {
+            previewRectF.offset(centerX - previewRectF.centerX(), centery - previewRectF.centerY());
+            matrix.setRectToRect(textureRectF, previewRectF, Matrix.ScaleToFit.FILL);
+            float scale = Math.max((float) width / previewSize.getWidth(), (float) height / previewSize.getHeight());
+
+            matrix.postScale(scale, scale, centerX, centery);
+            matrix.postRotate(90 * (rotation - 2), centerX, centery);
+            textureView.setTransform(matrix);
+
+        }
+    }
+
+    private void configureTransform(int viewWidth, int viewHeight) {
+        Activity activity = (Activity) context;
+        if (null == textureView || null == previewSize || null == activity) {
+            return;
+        }
+        int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
+        Matrix matrix = new Matrix();
+        RectF viewRect = new RectF(0, 0, viewWidth, viewHeight);
+        RectF bufferRect = new RectF(0, 0, previewSize.getHeight(), previewSize.getWidth());
+        float centerX = viewRect.centerX();
+        float centerY = viewRect.centerY();
+        if (Surface.ROTATION_90 == rotation || Surface.ROTATION_270 == rotation) {
+            bufferRect.offset(centerX - bufferRect.centerX(), centerY - bufferRect.centerY());
+            matrix.setRectToRect(viewRect, bufferRect, Matrix.ScaleToFit.FILL);
+            float scale = Math.max(
+                    (float) viewHeight / previewSize.getHeight(),
+                    (float) viewWidth / previewSize.getWidth());
+            matrix.postScale(scale, scale, centerX, centerY);
+            matrix.postRotate(90 * (rotation - 2), centerX, centerY);
+        } else if (Surface.ROTATION_180 == rotation) {
+            matrix.postRotate(180, centerX, centerY);
+        }
+        textureView.setTransform(matrix);
+    }
 
 }

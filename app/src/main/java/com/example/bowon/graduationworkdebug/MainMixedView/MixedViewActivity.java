@@ -25,6 +25,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.bowon.graduationworkdebug.ArgumentedDataHandler;
+import com.example.bowon.graduationworkdebug.AutoFitTextureView;
 import com.example.bowon.graduationworkdebug.Datatype.LocationCoordinate;
 import com.example.bowon.graduationworkdebug.GetAddress;
 import com.example.bowon.graduationworkdebug.PermissionHelper;
@@ -73,7 +74,7 @@ public class MixedViewActivity extends AppCompatActivity implements SensorEventL
     static ArgumentedDataHandler argumentedDataHandler;
 
     /*카메라 프리뷰 사용을 위한 설정*/
-    private TextureView cameraTexturePreview;
+    private AutoFitTextureView cameraTexturePreview;
     private Camera2Preview camera2Preview;
 
 
@@ -147,7 +148,7 @@ public class MixedViewActivity extends AppCompatActivity implements SensorEventL
 
 
         locationCoordinate = new LocationCoordinate();
-        cameraTexturePreview = (TextureView)findViewById(R.id.cameraTexturePreicew);
+        cameraTexturePreview = (AutoFitTextureView)findViewById(R.id.cameraTexturePreicew);
         camera2Preview = new Camera2Preview(this,cameraTexturePreview);
 
         /*내부 메모리 프리퍼런스 호출 - 셋팅 저장용*/
@@ -160,13 +161,14 @@ public class MixedViewActivity extends AppCompatActivity implements SensorEventL
 
         /*증강 스크린 설정*/
         argumentedView = new AugmentedView(this);
-        addContentView(argumentedView, new ActionBar.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT, ActionBar.LayoutParams.MATCH_PARENT));
+        addContentView(argumentedView, new ActionBar.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT, ActionBar.LayoutParams.WRAP_CONTENT));
 
         if(!isInited){
             mainMixedViewContext = new MixedViewContext(this);
             // 서버로부터 다운로드를 할 다운로드 관리자 설정
-            dWindow = new PaintScreen();
+
             argumentedDataHandler = new ArgumentedDataHandler(mainMixedViewContext);
+            dWindow = new PaintScreen();
             isInited = true;
         }
         if(settings.getBoolean("firstAccess",false)==false){
@@ -357,7 +359,7 @@ public class MixedViewActivity extends AppCompatActivity implements SensorEventL
             case PermissionHelper.CAMERA_PERMISSION : {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     //권한요청 성공 콜백
-                    cameraTexturePreview = (TextureView)findViewById(R.id.cameraTexturePreicew);
+                    cameraTexturePreview = (AutoFitTextureView)findViewById(R.id.cameraTexturePreicew);
                     camera2Preview = new Camera2Preview(this,cameraTexturePreview);
 
                 } else {
@@ -448,7 +450,7 @@ public class MixedViewActivity extends AppCompatActivity implements SensorEventL
             mainMixedViewContext.rotationMatrix.set(smoothR);
         }
 
-
+        tempText3.setText(mainMixedViewContext.rotationMatrix.toString());
         // 방위각도데이터
         // sensorManager.getOrientation(mRotationMatrix,mOrientationAngles);
         // 0 azimuth방위 1 pitch상하경사 2 roll좌우경사

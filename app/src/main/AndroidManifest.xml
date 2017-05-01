@@ -12,7 +12,12 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.NoActionBar">
-        <activity android:name=".MainMixedView.MixedViewActivity">
+
+        <activity
+            android:name=".MainMixedView.MixedViewActivity"
+            android:screenOrientation="landscape"
+            android:launchMode="singleTop"
+            >
 
         </activity>
         <!--

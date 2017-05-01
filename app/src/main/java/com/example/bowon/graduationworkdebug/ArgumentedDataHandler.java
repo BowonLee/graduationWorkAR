@@ -174,17 +174,18 @@ public class ArgumentedDataHandler {
         dataHandlerForMarker.updateActivateStatus(mainMixedViewContext);
 
         for(int i = 0 ;i <=dataHandlerForMarker.getMarkerLisrSize() -1 ;i++){
-            Log.e("getmarker",i+"");
+
 
             Marker marker = dataHandlerForMarker.getMarker(i);
-            Log.e("getMarker2",""+marker.getTitle());
+
 
            // if(!frozen){marker.calcPaint(cameraData,addX,addY);}
-            Log.e("MarkerCameraData",""+cameraData.width+" "+cameraData.height);
+
             marker.calcPaint(cameraData,addX,addY);
 
 
             marker.draw(dw);
+            Log.e("addxaddy","x : "+addX + " y : "+ addY+"cam" + cameraData.toString());
         }
 
         /*이후 레이더를 그리거나 이벤트들을 설정한다.*/
