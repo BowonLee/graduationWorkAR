@@ -30,6 +30,7 @@ import com.example.bowon.graduationworkdebug.Datatype.LocationCoordinate;
 import com.example.bowon.graduationworkdebug.GetAddress;
 import com.example.bowon.graduationworkdebug.PermissionHelper;
 import com.example.bowon.graduationworkdebug.R;
+import com.example.bowon.graduationworkdebug.TransplantingCamera2Preview;
 import com.example.bowon.graduationworkdebug.gui.PaintScreen;
 import com.example.bowon.graduationworkdebug.render.Matrix;
 
@@ -75,7 +76,8 @@ public class MixedViewActivity extends AppCompatActivity implements SensorEventL
 
     /*카메라 프리뷰 사용을 위한 설정*/
     private AutoFitTextureView cameraTexturePreview;
-    private Camera2Preview camera2Preview;
+    //private Camera2Preview camera2Preview;
+    private TransplantingCamera2Preview camera2Preview;
 
 
     /*
@@ -149,7 +151,7 @@ public class MixedViewActivity extends AppCompatActivity implements SensorEventL
 
         locationCoordinate = new LocationCoordinate();
         cameraTexturePreview = (AutoFitTextureView)findViewById(R.id.cameraTexturePreicew);
-        camera2Preview = new Camera2Preview(this,cameraTexturePreview);
+        camera2Preview = new TransplantingCamera2Preview(this,cameraTexturePreview);
 
         /*내부 메모리 프리퍼런스 호출 - 셋팅 저장용*/
         SharedPreferences settings = getSharedPreferences(PREFS_CODE, 0);
@@ -360,7 +362,7 @@ public class MixedViewActivity extends AppCompatActivity implements SensorEventL
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     //권한요청 성공 콜백
                     cameraTexturePreview = (AutoFitTextureView)findViewById(R.id.cameraTexturePreicew);
-                    camera2Preview = new Camera2Preview(this,cameraTexturePreview);
+                    camera2Preview = new TransplantingCamera2Preview(this,cameraTexturePreview);
 
                 } else {
                     // 권한요청 거부 콜백

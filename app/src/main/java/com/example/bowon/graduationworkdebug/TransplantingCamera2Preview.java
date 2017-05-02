@@ -44,11 +44,13 @@ public class TransplantingCamera2Preview  extends Thread  {
 
     Context context;
     MixedViewActivity mixedViewActivity;
-    TransplantingCamera2Preview(Context context,AutoFitTextureView textureView){
+    PermissionHelper permissionHelper;
+
+    public TransplantingCamera2Preview(Context context,AutoFitTextureView textureView){
         this.context = context;
         mTextureView = textureView;
         mixedViewActivity = (MixedViewActivity)context;
-
+        permissionHelper = new PermissionHelper(context);
     }
 
 
@@ -66,12 +68,12 @@ public class TransplantingCamera2Preview  extends Thread  {
     private final TextureView.SurfaceTextureListener mSurfaceTextureListener = new TextureView.SurfaceTextureListener() {
         @Override
         public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
-
+            openCamera(width,height);
         }
 
         @Override
         public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
-
+            configureTransform(width,height);
         }
 
         @Override
@@ -86,25 +88,35 @@ public class TransplantingCamera2Preview  extends Thread  {
     };
     private  String mCameraId;
 
-    private AutoFitTextureView mTextureView;
+    private TextureView mTextureView;
     private CameraDevice mCameraDevice;
     private CameraCaptureSession mCaptureSession;
     private Size mPreviewSize;
 
     private final CameraDevice.StateCallback mStateCallBack = new CameraDevice.StateCallback() {
         @Override
-        public void onOpened(CameraDevice camera) {
-
+        public void onOpened(CameraDevice cameraDevice) {
+            mCameraOpenCloseLock.release();
+            mCameraDevice = cameraDevice;
+            createCameraPreviewSession();
         }
 
         @Override
-        public void onDisconnected(CameraDevice camera) {
-
+        public void onDisconnected(CameraDevice cameraDevice) {
+            mCameraOpenCloseLock.release();
+            cameraDevice.close();
+            mCameraDevice = null;
         }
 
         @Override
-        public void onError(CameraDevice camera, int error) {
-
+        public void onError(CameraDevice cameraDevice, int error) {
+            mCameraOpenCloseLock.release();
+            cameraDevice.close();
+            mCameraDevice = null;
+            Activity activity = mixedViewActivity;
+            if (null!=activity){
+            activity.finish();
+            }
         }
     };
 
@@ -112,7 +124,7 @@ public class TransplantingCamera2Preview  extends Thread  {
 
     private Handler mBakcgroundHandler;
 
-    private Semaphore mCameraOpenCloseLock;
+    private Semaphore mCameraOpenCloseLock = new Semaphore(1);
 
     private int mSensorOrientation;
 
@@ -242,11 +254,11 @@ public class TransplantingCamera2Preview  extends Thread  {
 
                 int orientation = mixedViewActivity.getResources().getConfiguration().orientation;
                 if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                    mTextureView.setAspectRatio(
-                             mPreviewSize.getWidth(), mPreviewSize.getHeight());
+                  //  mTextureView.setAspectRatio(
+                   //          mPreviewSize.getWidth(), mPreviewSize.getHeight());
                 } else {
-                    mTextureView.setAspectRatio(
-                            mPreviewSize.getHeight(), mPreviewSize.getWidth());
+                  //  mTextureView.setAspectRatio(
+                  //          mPreviewSize.getHeight(), mPreviewSize.getWidth());
                 }
                 mCameraId = cameraId;
                 return;
@@ -261,11 +273,7 @@ public class TransplantingCamera2Preview  extends Thread  {
     * 카메라 디바이스를 연다
     * */
     private void openCamera(int width, int height) {
-        if (ContextCompat.checkSelfPermission(mixedViewActivity, Manifest.permission.CAMERA)
-                != PackageManager.PERMISSION_GRANTED) {
-            카메라 퍼미션
-            return;
-        }
+
         setUpCameraOutputs(width, height);
         configureTransform(width, height);
         Activity activity = mixedViewActivity;
@@ -274,11 +282,14 @@ public class TransplantingCamera2Preview  extends Thread  {
             if (!mCameraOpenCloseLock.tryAcquire(2500, TimeUnit.MILLISECONDS)) {
                 throw new RuntimeException("Time out waiting to lock camera opening.");
             }
+            permissionHelper.CameraPermission();
             manager.openCamera(mCameraId, mStateCallBack, mBakcgroundHandler);
         } catch (CameraAccessException e) {
             e.printStackTrace();
+        } catch (SecurityException e){
+            e.printStackTrace();
         } catch (InterruptedException e) {
-            throw new RuntimeException("Interrupted while trying to lock camera opening.", e);
+            e.printStackTrace();
         }
     }
 
@@ -330,7 +341,7 @@ public class TransplantingCamera2Preview  extends Thread  {
             mPreviewRequestBuilder.addTarget(surface);
 
             /*capturesession 설정*/
-            mCameraDevice.createCaptureSession(Arrays.asList(surface, null),
+            mCameraDevice.createCaptureSession(Arrays.asList(surface),
                     new CameraCaptureSession.StateCallback() {
                         @Override
                         public void onConfigured(CameraCaptureSession cameraCaptureSession) {
@@ -342,7 +353,15 @@ public class TransplantingCamera2Preview  extends Thread  {
                                     CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
 
                             mPreviewRequest = mPreviewRequestBuilder.build();
+                            HandlerThread handlerThread = new HandlerThread("Camera2Preview");
+                            handlerThread.start();
+                            android.os.Handler backgroundHandler = new android.os.Handler(handlerThread.getLooper());
 
+                            try {
+                                mCaptureSession.setRepeatingRequest(mPreviewRequestBuilder.build(), null, backgroundHandler);
+                            }catch(CameraAccessException e){
+                                e.printStackTrace();
+                            }
                         }
 
                         @Override
