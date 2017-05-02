@@ -357,8 +357,17 @@ abstract public class Marker implements Comparable<Marker>{
         this.active = active;
     }
 
-    // 아직 미사용
     abstract public int getMaxObjects();
+
+    public void drawOnMap(){
+
+
+    }
+
+
+
+
+
 
 }
 
