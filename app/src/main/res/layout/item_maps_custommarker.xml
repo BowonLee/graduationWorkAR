@@ -1,15 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content" android:layout_height="wrap_content">
-    
-    <TextView
+
+
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/marker_basic"
-        android:gravity="center"
-        android:textSize="16sp"
 
-        android:text="no data"
-        />
-    
+        android:gravity="center">
+
+        <ImageView
+            android:layout_width="40sp"
+            android:layout_height="40sp"
+            android:layout_gravity="center_horizontal"
+
+            android:id="@+id/item_maps_marker_image"
+            app:srcCompat="@drawable/btn_goto_camera" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:orientation="vertical"
+            >
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="title"
+                android:textSize="20sp"
+                android:textColor="#000000"
+                android:id="@+id/item_maps_marker_title"
+                />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="others"
+                android:textColor="#000000"
+                android:id="@+id/item_maps_marker_imfomation"
+                />
+
+
+        </LinearLayout>
+
+    </LinearLayout>
 </FrameLayout>

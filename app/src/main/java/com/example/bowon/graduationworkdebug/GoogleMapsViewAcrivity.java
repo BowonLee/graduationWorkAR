@@ -1,13 +1,23 @@
 package com.example.bowon.graduationworkdebug;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
+import android.view.LayoutInflater;
+import android.view.TextureView;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.example.bowon.graduationworkdebug.DataManagement.DataHandlerForMarker;
 import com.example.bowon.graduationworkdebug.MainMixedView.MixedViewActivity;
@@ -21,6 +31,8 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.List;
 /*
 * 시작 엑티비티 최초화면
@@ -43,6 +55,14 @@ public class GoogleMapsViewAcrivity extends FragmentActivity implements OnMapRea
 
     // 전체적으로 사용할 마커들 - 넓은 반경
     public List<Marker> markerList;
+    Marker markerOnMap;
+    /*커스텀 마커용 아이템*/
+
+    View markerRootView;
+    ImageView markerImage;
+    TextView markerTitle;
+    TextView markerInformation;
+    Context context;
 
 
     //내위치 관력
@@ -61,6 +81,8 @@ public class GoogleMapsViewAcrivity extends FragmentActivity implements OnMapRea
     * */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        markerList = new ArrayList<Marker>();
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
@@ -81,6 +103,7 @@ public class GoogleMapsViewAcrivity extends FragmentActivity implements OnMapRea
             }
         });
 
+        setCustomMarkerView();
 
         mLocationManager = (LocationManager)getSystemService(LOCATION_SERVICE);
         mPermissionHelper = new PermissionHelper(this);
@@ -120,22 +143,18 @@ public class GoogleMapsViewAcrivity extends FragmentActivity implements OnMapRea
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(37.537523, 126.96558), 14));
         // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(37.3751636,126.6339779);
-        LatLng sydney2 = new LatLng(37.3748073,126.6335562);
 
+        createMarkers();
 
-        mMap.addMarker(new MarkerOptions().position(sydney).title("학산도서관").icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_basic)));
-
-        mMap.addMarker(new MarkerOptions().position(sydney2).title("정보기술대").icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_basic)));
-
-
-
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
-
+        for(Marker marker: markerList){
+            createMarkerOnMap(marker,false);
+        }
        try {
             permissionHelper.LocationCoarsePermission();
-            mMap.setMyLocationEnabled(true);
+           // mMap.setMyLocationEnabled(true);
+
         }catch (SecurityException e){
             e.printStackTrace();
         }
@@ -147,9 +166,6 @@ public class GoogleMapsViewAcrivity extends FragmentActivity implements OnMapRea
 
         markerList.add(new MarkerForPlaceAPI("부천역",37.484322,126.782747,0,null));
 
-
-    }
-    private void drawMarkers(){
 
     }
 
@@ -166,10 +182,60 @@ public class GoogleMapsViewAcrivity extends FragmentActivity implements OnMapRea
 
     }
 
+    public  void setCustomMarkerView(){
+
+        markerRootView = LayoutInflater.from(this).inflate(R.layout.item_maps_custommarker,null);
+        markerImage = (ImageView)markerRootView.findViewById(R.id.item_maps_marker_image);
+        markerTitle = (TextView)markerRootView.findViewById(R.id.item_maps_marker_title);
+        markerInformation = (TextView) markerRootView.findViewById(R.id.item_maps_marker_imfomation);
+    }
+
+
+    public com.google.android.gms.maps.model.Marker createMarkerOnMap(Marker marker,boolean isSelectedMarker){
+
+        LatLng position = new LatLng(marker.getLatitude(),marker.getLongitude());
+        String markerTitleString = marker.getTitle();
+        String markerInfomationString = NumberFormat.getCurrencyInstance().format(marker.getDistance());
+
+        markerTitle.setText(markerTitleString);
+        markerInformation.setText(markerInfomationString);
+
+        if(isSelectedMarker){
+
+        }
+        else{
+
+        }
+        MarkerOptions markerOptions = new MarkerOptions();
+        markerOptions.title(markerTitleString);
+        markerOptions.position(position);
+        markerOptions.icon(BitmapDescriptorFactory.fromBitmap(createDrawableFromView(this,markerRootView)));
+
+        return mMap.addMarker(markerOptions);
+    }
+    private Bitmap createDrawableFromView(Context context,View view) {
+
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        ((Activity) context).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        view.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        view.measure(displayMetrics.widthPixels, displayMetrics.heightPixels);
+        view.layout(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels);
+        view.buildDrawingCache();
+        Bitmap bitmap = Bitmap.createBitmap(view.getMeasuredWidth(), view.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
+
+        Canvas canvas = new Canvas(bitmap);
+        view.draw(canvas);
+
+        return bitmap;
+    }
+
+
+
     @Override
     public void onLocationChanged(Location location) {
 
-        mMap.moveCamera(  CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(),location.getLongitude()),10));
+
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(),location.getLongitude()),10));
         mMap.animateCamera(CameraUpdateFactory.zoomIn());
        // mMap.animateCamera();
     }

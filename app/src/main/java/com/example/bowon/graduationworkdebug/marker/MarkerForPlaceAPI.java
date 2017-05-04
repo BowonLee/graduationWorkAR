@@ -1,5 +1,12 @@
 package com.example.bowon.graduationworkdebug.marker;
 
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import com.example.bowon.graduationworkdebug.R;
+
 /**
  * Created by bowon on 2017-05-02.
  */

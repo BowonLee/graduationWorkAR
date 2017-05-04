@@ -1,8 +1,10 @@
 package com.example.bowon.graduationworkdebug.marker;
 
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 
 
+import com.example.bowon.graduationworkdebug.R;
 import com.example.bowon.graduationworkdebug.render.CameraData;
 import com.example.bowon.graduationworkdebug.render.MixVector;
 import com.example.bowon.graduationworkdebug.PhysicalPlace;
@@ -11,11 +13,24 @@ import com.example.bowon.graduationworkdebug.gui.PaintScreen;
 import com.example.bowon.graduationworkdebug.gui.TextObj;
 import com.example.bowon.graduationworkdebug.gui.ScreenLine;
 import com.example.bowon.graduationworkdebug.CalculateUtil;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 
+import android.app.Activity;
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import  android.location.Location;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 /**
  * Created by bowon on 2017-03-13.
@@ -363,13 +378,14 @@ abstract public class Marker implements Comparable<Marker>{
 
 
     }
+    private void setMarkerView(){
 
-
-
+    }
 
 
 
 }
+
 
 // 스크린에 출력될 라벨 클래스
 class Label implements ScreenObj {
