@@ -4,6 +4,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
 
+import com.example.bowon.graduationworkdebug.MainMixedView.MixedViewActivity;
 import com.example.bowon.graduationworkdebug.R;
 import com.example.bowon.graduationworkdebug.render.CameraData;
 import com.example.bowon.graduationworkdebug.render.MixVector;
@@ -13,9 +14,6 @@ import com.example.bowon.graduationworkdebug.gui.PaintScreen;
 import com.example.bowon.graduationworkdebug.gui.TextObj;
 import com.example.bowon.graduationworkdebug.gui.ScreenLine;
 import com.example.bowon.graduationworkdebug.CalculateUtil;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 
 
 import android.app.Activity;
@@ -44,6 +42,13 @@ abstract public class Marker implements Comparable<Marker>{
 
     private final int circleSize = 20;
 
+    //커스텀 마커용
+    View markerRootView;
+    ImageView markerImage;
+    TextView markerTitle;
+    TextView markerInformation;
+
+
     private String ID;	// ID값
     protected String title;	// 타이틀
     private boolean underline = false;	// 밑줄 여부
@@ -51,6 +56,7 @@ abstract public class Marker implements Comparable<Marker>{
     protected PhysicalPlace mGeoLoc;	// 물리적 공간 객체. 실제 장소값을 저장
     // 유저와 물리적 공간 간의 거리(미터 단위)
     protected double distance;
+
 
 
     private boolean active;	// 활성화 여부
@@ -171,13 +177,7 @@ abstract public class Marker implements Comparable<Marker>{
 
     // 마커 위치를 업데이트
     public void update(Location curGPSFix) {
-        // 고도 0.0은 아마 POI의 고도가 알려지지 않았고,
-        // 유저의 GPS 높이를 세팅해야 한다는 것을 의미한다
-        // http://www.geonames.org/export/web-services.html#astergdem 를 참고하여
-        // SRTM, AGDEM 또는 GTOPO30등의 DEM모델을 사용해
-        // 정확한 높이를 측정 함으로써 이 문제를 개선할 수 있을 것이다
-
-        // 고도 값이 0.0일 경우 현재의 GPS픽스를 이용해 다시 고도값을 얻어온다
+    // 고도 값이 0.0일 경우 현재의 GPS픽스를 이용해 다시 고도값을 얻어온다
         if(mGeoLoc.getAltitude()==0.0)
             mGeoLoc.setAltitude(curGPSFix.getAltitude());
 
@@ -194,9 +194,6 @@ abstract public class Marker implements Comparable<Marker>{
         calcV(viewCam);	// 카메라의 고도를 계산
     }
 
-//	private void calcPaint(Camera viewCam) {
-//		cCMarker(origin, viewCam, 0, 0);
-//	}
 
     // 클릭이 허용되어 있는지 조사
     private boolean isClickValid(float x, float y) {
@@ -234,16 +231,15 @@ abstract public class Marker implements Comparable<Marker>{
 
     // 스크린에 실제로 그려주는 메소드
     public void draw(PaintScreen dw) {
-        drawCircle(dw);
-        drawTextBlock(dw);
 
+        drawTextBlock(dw);
 
     }
 
     // 스크린에 원을 그린다
     public void drawCircle(PaintScreen dw) {
         // 마커가 표시중인 상태일 경우 출력
-        isVisible = true;
+      //  isVisible = true;
         if (isVisible) {
             Log.e("Marker","Drawcircle"+this.ID+"  "+this.getTitle());
             // 우선 페인트 스크린을 설정한다
@@ -289,7 +285,7 @@ abstract public class Marker implements Comparable<Marker>{
                 250, dw, underline);
 
         // 출력되는 상황일 경우
-        isVisible = true;
+       // isVisible = true;
         if (isVisible) {
 
             // 데이터 소스에 따른 컬러를 지정
@@ -312,6 +308,34 @@ abstract public class Marker implements Comparable<Marker>{
             Log.e("Marker","Drawtext"+this.ID+"  "+this.getTitle()+signMarker.x+" "+signMarker.y+" "+txtLab.getWidth() + " "+maxHeight+ " " + currentAngle);
         }
 
+    }
+/*
+    public  void setCustomMarkerView(){
+
+        markerRootView = LayoutInflater.from(this).inflate(R.layout.item_maps_custommarker,null);
+        markerImage = (ImageView)markerRootView.findViewById(R.id.item_maps_marker_image);
+        markerTitle = (TextView)markerRootView.findViewById(R.id.item_maps_marker_title);
+        markerInformation = (TextView) markerRootView.findViewById(R.id.item_maps_marker_imfomation);
+    }
+*/
+    public void drawCustomMarker(){
+
+    }
+    private Bitmap createDrawableFromView(Context context,View view) {
+
+
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        ((Activity) context).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        view.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        view.measure(displayMetrics.widthPixels, displayMetrics.heightPixels);
+        view.layout(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels);
+        view.buildDrawingCache();
+        Bitmap bitmap = Bitmap.createBitmap(view.getMeasuredWidth(), view.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
+
+        Canvas canvas = new Canvas(bitmap);
+        view.draw(canvas);
+        Log.e("displayMt",displayMetrics.toString());
+        return bitmap;
     }
 
     // 데이터 뷰에서 터치시의 이벤트 처리 여부를 리턴
@@ -345,6 +369,8 @@ abstract public class Marker implements Comparable<Marker>{
         ID = iD;
     }
 
+
+
     // 두 마커를 비교한다. 정확하게는 두 마커의 거리를 비교하여 동일한지 판단한다
 
     public int compareTo(Marker another) {
@@ -373,14 +399,6 @@ abstract public class Marker implements Comparable<Marker>{
     }
 
     abstract public int getMaxObjects();
-
-    public void drawOnMap(){
-
-
-    }
-    private void setMarkerView(){
-
-    }
 
 
 

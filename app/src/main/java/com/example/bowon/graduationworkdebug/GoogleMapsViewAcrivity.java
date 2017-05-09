@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.location.Location;
 import android.location.LocationListener;
@@ -14,22 +15,28 @@ import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.bowon.graduationworkdebug.DataManagement.DataHandlerForMarker;
 import com.example.bowon.graduationworkdebug.MainMixedView.MixedViewActivity;
 import com.example.bowon.graduationworkdebug.marker.Marker;
 import com.example.bowon.graduationworkdebug.marker.MarkerForPlaceAPI;
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.PlaceLikelihood;
+import com.google.android.gms.location.places.PlaceLikelihoodBuffer;
 import com.google.android.gms.location.places.Places;
+import com.google.android.gms.location.places.ui.PlacePicker;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -94,6 +101,7 @@ public class GoogleMapsViewAcrivity extends FragmentActivity implements OnMapRea
     * */
 
 
+    int PLACE_PICKER_REQUEST =1 ;
     // placaapi 관련
     private GoogleApiClient mGoogleApiClient;
 
@@ -129,11 +137,23 @@ public class GoogleMapsViewAcrivity extends FragmentActivity implements OnMapRea
 
         /*
         * mGoogleAPI
+        * detection을 이용하여 주변정보를 얻어온다.
         * */
         mGoogleApiClient = new GoogleApiClient.Builder(this).addApi(Places.GEO_DATA_API).addApi(Places.PLACE_DETECTION_API).enableAutoManage(this,this).build();
 
-
-
+        PendingResult<PlaceLikelihoodBuffer> result = Places.PlaceDetectionApi
+                .getCurrentPlace(mGoogleApiClient, null);
+        result.setResultCallback(new ResultCallback<PlaceLikelihoodBuffer>() {
+            @Override
+            public void onResult(PlaceLikelihoodBuffer likelyPlaces) {
+                for (PlaceLikelihood placeLikelihood : likelyPlaces) {
+                    Log.e("PlaceDetection", String.format("Place '%s' has likelihood: %g",
+                            placeLikelihood.getPlace().getName(),
+                            placeLikelihood.getLikelihood()));
+                }
+                likelyPlaces.release();
+            }
+        });
     }
 
     @Override
@@ -234,6 +254,7 @@ public class GoogleMapsViewAcrivity extends FragmentActivity implements OnMapRea
         markerTitle.setText(markerTitleString);
         markerInformation.setText(markerInfomationString);
 
+
         if(isSelectedMarker){
                     markerOptions.alpha(1);
         }
@@ -251,6 +272,7 @@ public class GoogleMapsViewAcrivity extends FragmentActivity implements OnMapRea
 
     private Bitmap createDrawableFromView(Context context,View view) {
 
+
         DisplayMetrics displayMetrics = new DisplayMetrics();
         ((Activity) context).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         view.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
@@ -261,7 +283,6 @@ public class GoogleMapsViewAcrivity extends FragmentActivity implements OnMapRea
 
         Canvas canvas = new Canvas(bitmap);
         view.draw(canvas);
-
         return bitmap;
     }
 
@@ -319,6 +340,12 @@ public class GoogleMapsViewAcrivity extends FragmentActivity implements OnMapRea
     /*연결 실패시 처리*/
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
 
     }
 }

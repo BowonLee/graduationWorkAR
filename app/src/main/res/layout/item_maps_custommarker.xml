@@ -16,9 +16,9 @@
             android:layout_width="40sp"
             android:layout_height="40sp"
             android:layout_gravity="center_horizontal"
-
             android:id="@+id/item_maps_marker_image"
-            app:srcCompat="@drawable/btn_goto_camera" />
+            android:background="@drawable/btn_goto_camera"
+            />
 
         <LinearLayout
             android:layout_width="wrap_content"

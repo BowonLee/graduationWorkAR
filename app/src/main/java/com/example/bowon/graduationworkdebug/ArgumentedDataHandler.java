@@ -4,21 +4,18 @@ package com.example.bowon.graduationworkdebug;
  * Created by bowon on 2017-03-21.
  */
 
+import android.content.Context;
 import android.location.Location;
 import android.util.Log;
 import android.view.View;
-import android.widget.Toast;
 
 import com.example.bowon.graduationworkdebug.DataManagement.DataHandlerForMarker;
 import com.example.bowon.graduationworkdebug.MainMixedView.MixedViewContext;
 import com.example.bowon.graduationworkdebug.MainMixedView.MixedViewState;
 import com.example.bowon.graduationworkdebug.gui.PaintScreen;
-import com.example.bowon.graduationworkdebug.marker.DummyMarker;
 import com.example.bowon.graduationworkdebug.marker.Marker;
-import com.example.bowon.graduationworkdebug.marker.MarkerForPlaceAPI;
 import com.example.bowon.graduationworkdebug.render.CameraData;
 
-import java.util.ArrayList;
 import java.util.List;
 
 

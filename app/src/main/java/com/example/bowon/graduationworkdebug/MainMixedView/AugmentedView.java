@@ -1,5 +1,6 @@
 package com.example.bowon.graduationworkdebug.MainMixedView;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.util.Log;

@@ -35,8 +35,10 @@ public class DatasourceManagement {
     //구글 키값
     private  final String GOOGLE_KEY = "&key=AIzaSyDKFM4Ctcx8exyAR1mN0_sR_EL4epbDrRk";
 
-    //반경 단위 500
+    //반경 단위 500m
     private final String RADIUS= "&radius=500";
+
+    private final String Language = "&language = ko";
 
 
     public DatasourceManagement(){

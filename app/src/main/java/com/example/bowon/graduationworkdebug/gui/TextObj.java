@@ -46,8 +46,8 @@ public class TextObj implements ScreenObj {
 
 		// 경계는 흰색, 배경은 반투명한 검은색, 텍스트는 흰색, 텍스트 그림자는 반투명한 검은색
 		// 등으로 기본세팅 
-		this(txtInit, fontSizeInit, maxWidth, Color.rgb(255, 255, 255), Color
-				.argb(128, 0, 0, 0), Color.rgb(255, 255, 255), Color.argb(64, 0, 0, 0),
+		this(txtInit, fontSizeInit, maxWidth, Color.rgb(0, 0, 0), Color
+				.argb(128, 255, 255, 255), Color.rgb(0, 0, 0), Color.argb(64, 255, 255, 255),
 				dw.getTextAsc() / 2, dw, underline);
 	}
 
