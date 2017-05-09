@@ -6,6 +6,8 @@ package com.example.bowon.graduationworkdebug;
 
 import android.location.Location;
 import android.util.Log;
+import android.view.View;
+import android.widget.Toast;
 
 import com.example.bowon.graduationworkdebug.DataManagement.DataHandlerForMarker;
 import com.example.bowon.graduationworkdebug.MainMixedView.MixedViewContext;
@@ -13,6 +15,7 @@ import com.example.bowon.graduationworkdebug.MainMixedView.MixedViewState;
 import com.example.bowon.graduationworkdebug.gui.PaintScreen;
 import com.example.bowon.graduationworkdebug.marker.DummyMarker;
 import com.example.bowon.graduationworkdebug.marker.Marker;
+import com.example.bowon.graduationworkdebug.marker.MarkerForPlaceAPI;
 import com.example.bowon.graduationworkdebug.render.CameraData;
 
 import java.util.ArrayList;
@@ -29,6 +32,8 @@ import java.util.List;
 public class ArgumentedDataHandler {
     //현제 context
     private MixedViewContext mainMixedViewContext;
+    private  View view;
+
     //뷰의 초기 셋팅 여부 - 증강된 뷰는 셋팅이 이루어진 이후 처리가 이루어진다.
     //하지만 이 셋팅은 이미 되어 있으면 다시 할 필요가 없기에 리소스의 낭비방지를 위해 셋팅여부확인을 한다.
     private boolean isInit;
@@ -50,7 +55,7 @@ public class ArgumentedDataHandler {
     private DataHandlerForMarker dataHandlerForMarker = new DataHandlerForMarker();
     private  float radius = 20;// 검색 반경 설정
 
-    /*마커의 표시에서 사용되는 추가 수치 - 아직 정확이 뭔지 모름*/
+
     private float addX = 0,addY = 0;
 
     private boolean isLauncherStarted;
@@ -98,6 +103,7 @@ public class ArgumentedDataHandler {
         mainMixedViewContext.setLocationAtLastDownload(currentFixLocation);
     }
 
+
     //초기 세팅이 외어 있는지의 여부 확인 및 초기 세팅
     public boolean isInit(){return  isInit;}
 
@@ -119,6 +125,9 @@ public class ArgumentedDataHandler {
 
     }
 
+    public void getView(View view){
+        this.view = view;
+    }
     /**
      * 기존에 사용되는 DATAFORMAT을 사용하여 호출 할 URL을 만들고
      * 그URL을 context의 다운로더에 제출하여 데이터를 받아오느 ㄴ것 이다.
@@ -155,18 +164,10 @@ public class ArgumentedDataHandler {
          *
          *
          * */
-        List<Marker> dummyMarkers = new ArrayList<Marker>();
-        Marker marker1 ;
-        Marker marker2 ;
+        List<Marker> markers = GoogleMapsViewAcrivity.markerList;
 
 
-        marker1 = new DummyMarker("인천대학교 학산도서관",37.3751636,126.6339779,81,"");
-        marker2 = new DummyMarker("부천역",37.484322,126.782747,0,"");
-
-        dummyMarkers.add(marker1);
-        dummyMarkers.add(marker2);
-
-        dataHandlerForMarker.addMarkers(dummyMarkers);
+        dataHandlerForMarker.addMarkers(markers);
 
         /**
          * 위에서 생성된 마커들을 선별하여 표시하도록 설정한다.
@@ -178,6 +179,7 @@ public class ArgumentedDataHandler {
 
             Marker marker = dataHandlerForMarker.getMarker(i);
 
+         //   MarkerForPlaceAPI markerForPlaceAPI = (MarkerForPlaceAPI) dataHandlerForMarker.getMarker(i);
 
            // if(!frozen){marker.calcPaint(cameraData,addX,addY);}
 
@@ -185,12 +187,18 @@ public class ArgumentedDataHandler {
 
 
             marker.draw(dw);
+
+         //   markerForPlaceAPI.drawMarker(dw,getMainMixedViewContext(),view);
             Log.e("addxaddy","x : "+addX + " y : "+ addY+"cam" + cameraData.toString());
         }
 
         /*이후 레이더를 그리거나 이벤트들을 설정한다.*/
         mainMixedViewState.nextStatus = MixedViewState.PROCESSING;// 처리중 설정
     }
+
+    /**
+     * 지도 뷰에서 생성된 마커들을 그냥 받아온다.
+     * */
 
 
 }

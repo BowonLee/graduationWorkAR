@@ -37,7 +37,6 @@ public class AugmentedView extends View {
         MixedViewActivity.dWindow.setCanvas(canvas);
 
         if(!MixedViewActivity.argumentedDataHandler.isInit()){
-            Log.e("WindowWH",""+ MixedViewActivity.dWindow.getWidth()+ " "+ MixedViewActivity.dWindow.getHeight());
             MixedViewActivity.argumentedDataHandler.init( MixedViewActivity.dWindow.getWidth(),MixedViewActivity.dWindow.getHeight());
 
         }

@@ -8,14 +8,17 @@ import android.graphics.Canvas;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -23,6 +26,11 @@ import com.example.bowon.graduationworkdebug.DataManagement.DataHandlerForMarker
 import com.example.bowon.graduationworkdebug.MainMixedView.MixedViewActivity;
 import com.example.bowon.graduationworkdebug.marker.Marker;
 import com.example.bowon.graduationworkdebug.marker.MarkerForPlaceAPI;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.Places;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -46,15 +54,16 @@ import java.util.List;
 /*
 * 지도가 그려져있는 부분이다.
 * */
-public class GoogleMapsViewAcrivity extends FragmentActivity implements OnMapReadyCallback, LocationListener{
+public class GoogleMapsViewAcrivity extends FragmentActivity implements OnMapReadyCallback, LocationListener, GoogleMap.OnMarkerClickListener, GoogleApiClient.OnConnectionFailedListener {
+
 
     /*
     * 전역적으로 사용 될 증강 데이터 핸들러
     * */
-    public static DataHandlerForMarker staticDataHandlerForMarker;
+    private  DataHandlerForMarker mDataHandlerForMarker;
 
     // 전체적으로 사용할 마커들 - 넓은 반경
-    public List<Marker> markerList;
+    public static List<Marker> markerList;
     Marker markerOnMap;
     /*커스텀 마커용 아이템*/
 
@@ -63,10 +72,14 @@ public class GoogleMapsViewAcrivity extends FragmentActivity implements OnMapRea
     TextView markerTitle;
     TextView markerInformation;
     Context context;
-
+    com.google.android.gms.maps.model.Marker selectedMarker;
 
     //내위치 관력
     private LocationManager mLocationManager;
+    private Location mLocation;
+    private Boolean isLocationPossible= false;
+    private MarkerOptions mLocationMarkerOp;
+    private com.google.android.gms.maps.model.Marker mLocationMarker;
 
     //권한관련
     private PermissionHelper mPermissionHelper;
@@ -79,6 +92,11 @@ public class GoogleMapsViewAcrivity extends FragmentActivity implements OnMapRea
     * 지도화면 출력 -> 내 위치로 지도화면 이동(map 객체 사용) -> 서버통신 (asynktask)->서버통신 완료시 마커 생성
     *
     * */
+
+
+    // placaapi 관련
+    private GoogleApiClient mGoogleApiClient;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -108,25 +126,42 @@ public class GoogleMapsViewAcrivity extends FragmentActivity implements OnMapRea
         mLocationManager = (LocationManager)getSystemService(LOCATION_SERVICE);
         mPermissionHelper = new PermissionHelper(this);
 
+
+        /*
+        * mGoogleAPI
+        * */
+        mGoogleApiClient = new GoogleApiClient.Builder(this).addApi(Places.GEO_DATA_API).addApi(Places.PLACE_DETECTION_API).enableAutoManage(this,this).build();
+
+
+
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
-          Location gps,network;
-        mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,1000,10, this);
-        mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,1000,10, this);
-        permissionHelper.LocationPermission();
-        gps = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        network = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+        try {
+            permissionHelper.LocationPermission();
+            Location gps, network;
 
-        if(gps != null){
-            mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,1000,10, this);
-        }else if(network != null){
-            mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,1000,10, this);
-        }else{
+            mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 10, this);
+            mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 10, this);
+
+            gps = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            network = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+
+            if (gps != null) {
+                mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 10, this);
+            } else if (network != null) {
+                mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 10, this);
+            } else {
+            }
+
+
+        }catch (SecurityException e){
+            e.printStackTrace();
         }
+        mLocationMarkerOp = new MarkerOptions();
 
     }
 
@@ -142,45 +177,43 @@ public class GoogleMapsViewAcrivity extends FragmentActivity implements OnMapRea
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(37.537523, 126.96558), 14));
-        // Add a marker in Sydney and move the camera
+        mMap.setOnMarkerClickListener(this);
+       // Add a marker in Sydney and move the camera
+        mDataHandlerForMarker = new DataHandlerForMarker();
 
         createMarkers();
+        drawMarkersOnMap();
 
-        for(Marker marker: markerList){
-            createMarkerOnMap(marker,false);
-        }
-       try {
-            permissionHelper.LocationCoarsePermission();
-           // mMap.setMyLocationEnabled(true);
 
-        }catch (SecurityException e){
-            e.printStackTrace();
+    }
+
+    private void drawMarkersOnMap(){
+        for(int i = 0;i<mDataHandlerForMarker.getMarkerLisrSize();i++){
+            createMarkerOnMap(mDataHandlerForMarker.getMarker(i),false);
         }
 
 
     }
+
+
 
     public void createMarkers(){
 
         markerList.add(new MarkerForPlaceAPI("부천역",37.484322,126.782747,0,null));
+        markerList.add(new MarkerForPlaceAPI("공과대학",37.373268,126.634797,0,null));
+        markerList.add(new MarkerForPlaceAPI("자연과학대",37.375009,126.636460,0,null));
+        markerList.add(new MarkerForPlaceAPI("인천대 입구",37.386469,126.639383,0,null));
+        markerList.add(new MarkerForPlaceAPI("정보기술대",37.374543,126.633457,0,null));
 
-
-    }
-
-
-
-    public void drawMarkersOnMap(){
-        LatLng marker;
-
-        for(int i = 0;i<=markerList.size();i++){
-
-           // googleMap.addMarker();
-        }
-
+        mDataHandlerForMarker.addMarkers(markerList);
 
     }
+
+
+
+
+
+
 
     public  void setCustomMarkerView(){
 
@@ -191,28 +224,31 @@ public class GoogleMapsViewAcrivity extends FragmentActivity implements OnMapRea
     }
 
 
-    public com.google.android.gms.maps.model.Marker createMarkerOnMap(Marker marker,boolean isSelectedMarker){
+    private com.google.android.gms.maps.model.Marker createMarkerOnMap(Marker marker, boolean isSelectedMarker){
 
         LatLng position = new LatLng(marker.getLatitude(),marker.getLongitude());
         String markerTitleString = marker.getTitle();
         String markerInfomationString = NumberFormat.getCurrencyInstance().format(marker.getDistance());
+        MarkerOptions markerOptions = new MarkerOptions();
 
         markerTitle.setText(markerTitleString);
         markerInformation.setText(markerInfomationString);
 
         if(isSelectedMarker){
-
+                    markerOptions.alpha(1);
         }
         else{
-
+                    markerOptions.alpha(0.7f);
         }
-        MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.title(markerTitleString);
         markerOptions.position(position);
         markerOptions.icon(BitmapDescriptorFactory.fromBitmap(createDrawableFromView(this,markerRootView)));
+        markerOptions.alpha(0.7f);
+        markerOptions.snippet(marker.getID());
 
         return mMap.addMarker(markerOptions);
     }
+
     private Bitmap createDrawableFromView(Context context,View view) {
 
         DisplayMetrics displayMetrics = new DisplayMetrics();
@@ -230,14 +266,26 @@ public class GoogleMapsViewAcrivity extends FragmentActivity implements OnMapRea
     }
 
 
+    public void updateMarkers(){
+        mMap.clear();
+        drawMarkersOnMap();
+        mMap.addMarker(mLocationMarkerOp).setZIndex(1);
+
+    }
 
     @Override
     public void onLocationChanged(Location location) {
 
+        mDataHandlerForMarker.onLocationChanged(location);
 
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(),location.getLongitude()),10));
-        mMap.animateCamera(CameraUpdateFactory.zoomIn());
-       // mMap.animateCamera();
+        mLocation = location;
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(),location.getLongitude()),16));
+
+
+        mLocationMarkerOp.position(new LatLng(location.getLatitude(),location.getLongitude())).icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_map_mlocation));
+        updateMarkers();
+
+
     }
 
     @Override
@@ -252,6 +300,25 @@ public class GoogleMapsViewAcrivity extends FragmentActivity implements OnMapRea
 
     @Override
     public void onProviderDisabled(String provider) {
+
+    }
+
+
+    @Override
+    public boolean onMarkerClick(com.google.android.gms.maps.model.Marker marker) {
+        CameraUpdate center = CameraUpdateFactory.newLatLng(marker.getPosition());
+        mMap.animateCamera(center);
+        marker.setAlpha(1);
+        marker.hideInfoWindow();
+        updateMarkers();
+
+        return false;
+    }
+
+
+    /*연결 실패시 처리*/
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
     }
 }

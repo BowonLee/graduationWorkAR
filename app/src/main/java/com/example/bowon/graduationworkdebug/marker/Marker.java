@@ -237,7 +237,6 @@ abstract public class Marker implements Comparable<Marker>{
         drawCircle(dw);
         drawTextBlock(dw);
 
-        dw.paintText(150,150,"markerobjectDraw",true);
 
     }
 
@@ -264,6 +263,7 @@ abstract public class Marker implements Comparable<Marker>{
 
         }
     }
+
 
     // 텍스트 블록을 그린다. 일반적으로 URL 등을 담고있는 데이터 소스 등에 사용된다
     public void drawTextBlock(PaintScreen dw) {

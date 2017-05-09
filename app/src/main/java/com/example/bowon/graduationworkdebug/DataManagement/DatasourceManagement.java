@@ -1,5 +1,10 @@
 package com.example.bowon.graduationworkdebug.DataManagement;
 
+import android.location.Location;
+
+import com.example.bowon.graduationworkdebug.Manifest;
+import com.example.bowon.graduationworkdebug.R;
+
 import javax.sql.DataSource;
 
 /**
@@ -24,7 +29,32 @@ import javax.sql.DataSource;
 * */
 public class DatasourceManagement {
 
-    public DatasourceManagement(){}
+    //place url
+    private final String GOOGLE_PLACE_API_URL = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?";
+
+    //구글 키값
+    private  final String GOOGLE_KEY = "&key=AIzaSyDKFM4Ctcx8exyAR1mN0_sR_EL4epbDrRk";
+
+    //반경 단위 500
+    private final String RADIUS= "&radius=500";
+
+
+    public DatasourceManagement(){
+        /* 기본 생성자 */
+
+    }
+
+    public String makeRequestURL(Location location,String fillter){
+        String requestURL;
+        String locationText;
+        locationText = "location="+location.getLatitude()+","+location.getLongitude();
+
+
+
+
+        requestURL = GOOGLE_PLACE_API_URL+locationText+RADIUS+GOOGLE_KEY;
+        return requestURL;
+    }
 
 
 

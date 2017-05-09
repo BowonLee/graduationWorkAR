@@ -38,12 +38,7 @@ public class MixedViewActivity extends AppCompatActivity implements SensorEventL
 
     /*Log용 태그*/
     private static final String TAG = "MixedViewActivity";
-    /**
-     * 이전 데이터 표시들을 위해 임시로 사용하는 UI
-     * */
-    TextView tempText1;
-    TextView tempText2;
-    TextView tempText3;
+
 
     /*UI 구현을 위한 UI item 선언부*/
     Button mapChangeButton;
@@ -168,6 +163,7 @@ public class MixedViewActivity extends AppCompatActivity implements SensorEventL
             // 서버로부터 다운로드를 할 다운로드 관리자 설정
 
             argumentedDataHandler = new ArgumentedDataHandler(mainMixedViewContext);
+            argumentedDataHandler.getView(argumentedView);
             dWindow = new PaintScreen();
             isInited = true;
         }
@@ -221,7 +217,7 @@ public class MixedViewActivity extends AppCompatActivity implements SensorEventL
     @Override
     protected void onResume() {
         super.onResume();
-        setTempTextview();
+
         getPermissionGroup();
 
         mainMixedViewContext.mainMixedViewActivity = this;
@@ -298,7 +294,7 @@ public class MixedViewActivity extends AppCompatActivity implements SensorEventL
          * 다운로드 쓰레드 활성화
          */
 
-        updateTextview();
+       
         camera2Preview.onResume();
 
 
@@ -316,29 +312,12 @@ public class MixedViewActivity extends AppCompatActivity implements SensorEventL
         sensorManager.unregisterListener(this);
     }
 
-    public void setTempTextview(){
-        tempText1 = (TextView)findViewById(R.id.tempText1);//내 좌표
-        tempText2 = (TextView)findViewById(R.id.tempText2);//위치정보제공자
-        tempText3 = (TextView)findViewById(R.id.tempText3); //센서정보
-        tempText1.setText("위치정보 수신 전");
-        tempText3.setText("Sensor 정보 미 수신");
-
-
-    }
-
 
     public void getPermissionGroup(){
         // 권한요청 - 시작과 동시에 필요한 권한들
         permissionHelper = new PermissionHelper(this);
         permissionHelper.LocationPermission();
         permissionHelper.CameraPermission();
-    }
-    public void updateTextview(){
-
-        tempText1.setText("la : " + mainMixedViewContext.currentLocation.getLatitude() +"\nlo : " + mainMixedViewContext.currentLocation.getLongitude()+"\nat : " + mainMixedViewContext.currentLocation.getAltitude());
-        tempText2.setText("provider : " + mainMixedViewContext.currentLocation.getProvider() + "\nacc : " +
-                mainMixedViewContext.currentLocation.getAccuracy()+"\naddress : " +getAddress.getAddressName(mainMixedViewContext.currentLocation.getLatitude(),mainMixedViewContext.currentLocation.getLongitude()) );
-        Log.e(TAG,"la : " + mainMixedViewContext.currentLocation.getLatitude() +"\nlo : " + mainMixedViewContext.currentLocation.getLongitude()+"\nat : " + mainMixedViewContext.currentLocation.getAltitude());
     }
 
     @Override
@@ -450,8 +429,7 @@ public class MixedViewActivity extends AppCompatActivity implements SensorEventL
             mainMixedViewContext.rotationMatrix.set(smoothR);
         }
 
-        tempText3.setText(mainMixedViewContext.rotationMatrix.toString());
-        // 방위각도데이터
+          // 방위각도데이터
         // sensorManager.getOrientation(mRotationMatrix,mOrientationAngles);
         // 0 azimuth방위 1 pitch상하경사 2 roll좌우경사
 
@@ -552,7 +530,6 @@ public class MixedViewActivity extends AppCompatActivity implements SensorEventL
 
 
         LocationDataUpdate(location);
-        updateTextview();
 
 
 
