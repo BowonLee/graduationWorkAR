@@ -56,8 +56,7 @@ abstract public class Marker implements Comparable<Marker>{
     protected PhysicalPlace mGeoLoc;	// 물리적 공간 객체. 실제 장소값을 저장
     // 유저와 물리적 공간 간의 거리(미터 단위)
     protected double distance;
-
-
+    private Bitmap image;
 
     private boolean active;	// 활성화 여부
 
@@ -162,15 +161,6 @@ abstract public class Marker implements Comparable<Marker>{
             if (CalculateUtil.pointInside(cMarker.x, cMarker.y, 0, 0,
                     viewCam.width, viewCam.height)) {
 
-//				float xDist = cMarker.x - viewCam.width / 2;
-//				float yDist = cMarker.y - viewCam.height / 2;
-//				float dist = xDist * xDist + yDist * yDist;
-
-//				deltaCenter = (float) Math.sqrt(dist);
-//
-//				if (dist < 50 * 50) {
-//					isLookingAt = true;
-//				}
             }
         }
     }
@@ -237,29 +227,6 @@ abstract public class Marker implements Comparable<Marker>{
     }
 
     // 스크린에 원을 그린다
-    public void drawCircle(PaintScreen dw) {
-        // 마커가 표시중인 상태일 경우 출력
-      //  isVisible = true;
-        if (isVisible) {
-            Log.e("Marker","Drawcircle"+this.ID+"  "+this.getTitle());
-            // 우선 페인트 스크린을 설정한다
-            float maxHeight = dw.getHeight();
-            dw.setStrokeWidth(maxHeight / 100f);
-            dw.setFill(false);
-            dw.setColor(Color.RED);
-
-
-            //draw circle with radius depending on distance
-            //0.44 is approx. vertical fov in radians
-            double angle = 2.0*Math.atan2(10,distance);
-            double radius = Math.max(Math.min(angle/0.44 * maxHeight, maxHeight),maxHeight/25f);
-            //double radius = angle/0.44d * (double)maxHeight;
-
-            dw.paintCircle(cMarker.x, cMarker.y, 80);
-
-        }
-    }
-
 
     // 텍스트 블록을 그린다. 일반적으로 URL 등을 담고있는 데이터 소스 등에 사용된다
     public void drawTextBlock(PaintScreen dw) {
@@ -369,7 +336,9 @@ abstract public class Marker implements Comparable<Marker>{
         ID = iD;
     }
 
+    public Bitmap getImage(){return  image;}
 
+    public void setImage(Bitmap image){this.image = image;}
 
     // 두 마커를 비교한다. 정확하게는 두 마커의 거리를 비교하여 동일한지 판단한다
 

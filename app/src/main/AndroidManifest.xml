@@ -13,6 +13,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.NoActionBar">
 
+        <activity android:name=".MarkerDetailReadingActivity"
+            android:launchMode="singleTop"></activity>
         <activity
             android:name=".MainMixedView.MixedViewActivity"
             android:screenOrientation="landscape"

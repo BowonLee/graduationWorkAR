@@ -6,12 +6,16 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.text.Html;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -33,8 +37,12 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.PlaceDetectionApi;
 import com.google.android.gms.location.places.PlaceLikelihood;
 import com.google.android.gms.location.places.PlaceLikelihoodBuffer;
+import com.google.android.gms.location.places.PlacePhotoMetadata;
+import com.google.android.gms.location.places.PlacePhotoMetadataBuffer;
+import com.google.android.gms.location.places.PlacePhotoMetadataResult;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.location.places.ui.PlacePicker;
 import com.google.android.gms.maps.CameraUpdate;
@@ -80,6 +88,7 @@ public class GoogleMapsViewAcrivity extends FragmentActivity implements OnMapRea
     TextView markerInformation;
     Context context;
     com.google.android.gms.maps.model.Marker selectedMarker;
+    Boolean isMarkerImageReady = false;
 
     //내위치 관력
     private LocationManager mLocationManager;
@@ -141,19 +150,6 @@ public class GoogleMapsViewAcrivity extends FragmentActivity implements OnMapRea
         * */
         mGoogleApiClient = new GoogleApiClient.Builder(this).addApi(Places.GEO_DATA_API).addApi(Places.PLACE_DETECTION_API).enableAutoManage(this,this).build();
 
-        PendingResult<PlaceLikelihoodBuffer> result = Places.PlaceDetectionApi
-                .getCurrentPlace(mGoogleApiClient, null);
-        result.setResultCallback(new ResultCallback<PlaceLikelihoodBuffer>() {
-            @Override
-            public void onResult(PlaceLikelihoodBuffer likelyPlaces) {
-                for (PlaceLikelihood placeLikelihood : likelyPlaces) {
-                    Log.e("PlaceDetection", String.format("Place '%s' has likelihood: %g",
-                            placeLikelihood.getPlace().getName(),
-                            placeLikelihood.getLikelihood()));
-                }
-                likelyPlaces.release();
-            }
-        });
     }
 
     @Override
@@ -201,33 +197,59 @@ public class GoogleMapsViewAcrivity extends FragmentActivity implements OnMapRea
        // Add a marker in Sydney and move the camera
         mDataHandlerForMarker = new DataHandlerForMarker();
 
-        createMarkers();
+        createPlaceMarkers();
+
         drawMarkersOnMap();
-
-
     }
 
     private void drawMarkersOnMap(){
         for(int i = 0;i<mDataHandlerForMarker.getMarkerLisrSize();i++){
             createMarkerOnMap(mDataHandlerForMarker.getMarker(i),false);
         }
-
-
+        //placePhotosTask();
     }
 
 
 
-    public void createMarkers(){
 
-        markerList.add(new MarkerForPlaceAPI("부천역",37.484322,126.782747,0,null));
-        markerList.add(new MarkerForPlaceAPI("공과대학",37.373268,126.634797,0,null));
-        markerList.add(new MarkerForPlaceAPI("자연과학대",37.375009,126.636460,0,null));
-        markerList.add(new MarkerForPlaceAPI("인천대 입구",37.386469,126.639383,0,null));
-        markerList.add(new MarkerForPlaceAPI("정보기술대",37.374543,126.633457,0,null));
+    public void createPlaceMarkers(){
 
-        mDataHandlerForMarker.addMarkers(markerList);
+        //markerList.clear();
+
+        PendingResult<PlaceLikelihoodBuffer> result = Places.PlaceDetectionApi
+                .getCurrentPlace(mGoogleApiClient, null);
+
+
+
+        result.setResultCallback(new ResultCallback<PlaceLikelihoodBuffer>() {
+
+
+            @Override
+            public void onResult(PlaceLikelihoodBuffer likelyPlaces) {
+
+
+                for (PlaceLikelihood placeLikelihood : likelyPlaces) {
+                    markerList.add(
+                            new MarkerForPlaceAPI(placeLikelihood.getPlace().getName().toString(),
+                            placeLikelihood.getPlace().getLatLng().latitude,
+                            placeLikelihood.getPlace().getLatLng().longitude,0,null,
+                            placeLikelihood.getPlace().getId())
+                    );
+                }
+                likelyPlaces.release();
+                mDataHandlerForMarker.addMarkers(markerList);
+                drawMarkersOnMap();
+            }
+
+        });
+
+        /*
+        * phototask 시작
+        * */
+
 
     }
+
 
 
 
@@ -250,10 +272,27 @@ public class GoogleMapsViewAcrivity extends FragmentActivity implements OnMapRea
         String markerTitleString = marker.getTitle();
         String markerInfomationString = NumberFormat.getCurrencyInstance().format(marker.getDistance());
         MarkerOptions markerOptions = new MarkerOptions();
+        Drawable markerImageDrawable;
 
         markerTitle.setText(markerTitleString);
         markerInformation.setText(markerInfomationString);
 
+        if(isMarkerImageReady){
+
+        markerImageDrawable = new BitmapDrawable(getResources(),marker.getImage());
+            if(marker.getImage() == null){
+
+                Log.e("markerImageLog","nullImage");
+
+            }else{
+
+                Log.e("markerImageLog",""+marker.getImage().toString());
+                markerImage.setBackground(markerImageDrawable);
+
+            }
+            Toast.makeText(this,"BitMapRedraw",Toast.LENGTH_SHORT);
+
+        }
 
         if(isSelectedMarker){
                     markerOptions.alpha(1);
@@ -264,11 +303,12 @@ public class GoogleMapsViewAcrivity extends FragmentActivity implements OnMapRea
         markerOptions.title(markerTitleString);
         markerOptions.position(position);
         markerOptions.icon(BitmapDescriptorFactory.fromBitmap(createDrawableFromView(this,markerRootView)));
-        markerOptions.alpha(0.7f);
+
         markerOptions.snippet(marker.getID());
 
         return mMap.addMarker(markerOptions);
     }
+
 
     private Bitmap createDrawableFromView(Context context,View view) {
 
@@ -300,13 +340,14 @@ public class GoogleMapsViewAcrivity extends FragmentActivity implements OnMapRea
         mDataHandlerForMarker.onLocationChanged(location);
 
         mLocation = location;
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(),location.getLongitude()),16));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(),location.getLongitude()),20));
 
 
-        mLocationMarkerOp.position(new LatLng(location.getLatitude(),location.getLongitude())).icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_map_mlocation));
+        mLocationMarkerOp.position(new LatLng(location.getLatitude(),location.getLongitude())).icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_map_mlocation)).snippet(location.getProvider());
         updateMarkers();
 
 
+        Toast.makeText(this,location.getProvider().toString(),Toast.LENGTH_SHORT);
     }
 
     @Override
@@ -348,4 +389,105 @@ public class GoogleMapsViewAcrivity extends FragmentActivity implements OnMapRea
         super.onActivityResult(requestCode, resultCode, data);
 
     }
+
+
+
+    private void placePhotosTask() {
+
+        // Create a new AsyncTask that displays the bitmap and attribution once loaded.
+        new PhotoTask(markerImage.getWidth(), markerImage.getHeight()) {
+            @Override
+            protected void onPreExecute() {
+                // Display a temporary image to show while bitmap is loading.
+            }
+
+            @Override
+            protected void onPostExecute(Integer integer) {
+                super.onPostExecute(integer);
+                isMarkerImageReady = true;
+
+                mMap.clear();
+                drawMarkersOnMap();
+
+            }
+        }.execute("start");
+    }
+
+
+
+    /*
+    * 플레이스 api를 이용하여 비트맵을 받아오기 위해 구현된 Asynktask
+    * */
+    abstract class PhotoTask extends AsyncTask<String, Void, Integer> {
+
+        private int mHeight;
+
+        private int mWidth;
+
+        public PhotoTask(int width, int height) {
+
+            /*
+            * 이미지 뷰에 맞게 비트맵 이미지 크기를 미리 지정
+            * */
+            mHeight = width;
+            mWidth = height;
+        }
+
+        /**
+         * Loads the first photo for a place id from the Geo Data API.
+         * The place id must be the first (and only) parameter.
+         */
+        @Override
+        protected Integer doInBackground(String... params) {
+
+            String placeId ;
+
+            PlacePhotoMetadataResult result;
+
+            for(int i =0;i<markerList.size();i++){
+                placeId = markerList.get(i).getID();
+                result = Places.GeoDataApi
+                        .getPlacePhotos(mGoogleApiClient, placeId).await();
+                Log.e("Asynk",""+markerList.get(i).getTitle());
+
+                if (result.getStatus().isSuccess()) {
+                    PlacePhotoMetadataBuffer photoMetadataBuffer = result.getPhotoMetadata();
+                    if (photoMetadataBuffer.getCount() > 0 && !isCancelled()) {
+                        // Get the first bitmap and its attributions.
+                        PlacePhotoMetadata photo = photoMetadataBuffer.get(0);
+                        CharSequence attribution = photo.getAttributions();
+                        // Load a scaled bitmap for this photo.
+
+
+
+                        Bitmap image = photo.getScaledPhoto(mGoogleApiClient, mWidth, mHeight).await()
+                                .getBitmap();
+                        Log.e("AsynkImage",""+image.toString());
+                        markerList.get(i).setImage(image);
+
+
+                    }else{
+                        Log.e("AsynkImage","Cancel Or BufferOut");
+
+                    }
+                    // Release the PlacePhotoMetadataBuffer.
+                    photoMetadataBuffer.release();
+                }else{
+                    Log.e("Asynk","imageLoadFail");
+
+                }
+
+            }
+
+            return 1;
+        }
+
+
+        /**
+         * Holder for an image and its attribution.
+         */
+    }
+
+
+
 }

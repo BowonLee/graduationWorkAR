@@ -18,14 +18,21 @@ public class MarkerForPlaceAPI extends Marker {
      * */
 
 
-
+    private String placeId;
     public MarkerForPlaceAPI(String title, double latitude, double longitude, double altitude, String link){
         super(title, latitude, longitude, altitude, link);
-
-
-
+    }
+    public MarkerForPlaceAPI(String title, double latitude, double longitude, double altitude, String link,String placeId){
+        super(title, latitude, longitude, altitude, link);
+        setPlaceId(placeId);
     }
 
+    public String getPlaceId(){
+        return placeId;
+    }
+    public void setPlaceId(String placeId){
+        this.placeId = placeId;
+    }
 
 
 

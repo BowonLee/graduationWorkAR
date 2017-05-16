@@ -17,33 +17,34 @@ tools:context="com.example.bowon.graduationworkdebug.GoogleMapsViewAcrivity" />
 
 
     <Button
-        android:layout_width="75dp"
-        android:layout_height="75dp"
-        android:id="@+id/button_for_changeviewtype_camera"
-        android:visibility="visible"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentEnd="true"
-        android:background="@drawable/selector_goto_camera"
-        android:scaleType="fitXY"
-        android:padding="0sp"
-
-        />
-
-    <Button
-        android:layout_width="53dp"
-        android:layout_height="75dp"
+        android:layout_width="37dp"
+        android:layout_height="50dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
         android:id="@+id/button_for_write_map"
         android:background="@drawable/selector_goto_writepage" />
 
     <Button
-        android:layout_width="75dp"
-        android:layout_height="75dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentStart="true"
         android:id="@+id/button_for_fillter_map"
-        android:background="@drawable/selector_btn_fillter" />
+        android:background="@drawable/btn_fillter" />
+
+    <Button
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:id="@+id/button_for_changeviewtype_camera"
+        android:visibility="visible"
+        android:background="@drawable/selector_goto_camera"
+        android:scaleType="fitXY"
+        android:padding="0sp"
+
+        android:layout_marginEnd="5dp"
+        android:layout_marginTop="10dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true" />
 
 </RelativeLayout>
 

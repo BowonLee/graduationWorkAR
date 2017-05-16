@@ -7,24 +7,24 @@
     tools:context="com.example.bowon.graduationworkdebug.MainMixedView.MixedViewActivity">
 
     <Button
-        android:layout_width="75dp"
-        android:layout_height="75dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:id="@+id/button_for_changeviewtype_map"
         android:background="@drawable/selector_goto_camera_land"
         android:layout_alignParentTop="true"
         android:layout_alignParentStart="true" />
 
     <Button
-        android:layout_width="75dp"
-        android:layout_height="75dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:id="@+id/btn_for_fillter_camera"
-        android:background="@drawable/selector_btn_fillter_land"
+        android:background="@drawable/land_btn_fillter"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true" />
 
     <Button
-        android:layout_width="75dp"
-        android:layout_height="53dp"
+        android:layout_width="50dp"
+        android:layout_height="37dp"
         android:id="@+id/btn_for_write_camera"
         android:background="@drawable/selector_goto_writepage_land"
         android:layout_alignParentTop="true"

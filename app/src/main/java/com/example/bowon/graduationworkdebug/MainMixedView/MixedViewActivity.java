@@ -1,6 +1,7 @@
 package com.example.bowon.graduationworkdebug.MainMixedView;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.hardware.GeomagneticField;
@@ -20,13 +21,13 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.bowon.graduationworkdebug.ArgumentedDataHandler;
 import com.example.bowon.graduationworkdebug.AutoFitTextureView;
 import com.example.bowon.graduationworkdebug.Datatype.LocationCoordinate;
 import com.example.bowon.graduationworkdebug.GetAddress;
+import com.example.bowon.graduationworkdebug.MarkerDetailReadingActivity;
 import com.example.bowon.graduationworkdebug.PermissionHelper;
 import com.example.bowon.graduationworkdebug.R;
 import com.example.bowon.graduationworkdebug.gui.PaintScreen;
@@ -42,7 +43,7 @@ public class MixedViewActivity extends AppCompatActivity implements SensorEventL
 
     /*UI 구현을 위한 UI item 선언부*/
     Button mapChangeButton;
-
+    Button mapFillterButton;
 
 
     /*angle 계산을 위한 메트릭스*/
@@ -125,14 +126,21 @@ public class MixedViewActivity extends AppCompatActivity implements SensorEventL
 
         /*UI구성*/
         mapChangeButton = (Button)findViewById(R.id.button_for_changeviewtype_map);
-
+/*
         mapChangeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                /*Intent intent = new Intent(MixedViewActivity.this, GoogleMapsViewAcrivity.class);
-                startActivity(intent);*/
+
                 MixedViewActivity.this.finish();
 
+            }
+        });*/
+        mapFillterButton = (Button)findViewById(R.id.btn_for_fillter_camera);
+        mapFillterButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MixedViewActivity.this, MarkerDetailReadingActivity.class);
+                startActivity(intent);
             }
         });
 
@@ -500,36 +508,12 @@ public class MixedViewActivity extends AppCompatActivity implements SensorEventL
                 isGpsProviderEnable = true;
             }
 
-        }else{
-            synchronized (mainMixedViewContext.currentLocation){
-                mainMixedViewContext.currentLocation = location;
-            }
-
-            // mainMixedViewContext.currentLocation = location;
-            //if (argumentedDataHandler.isFrozen()){
-                argumentedDataHandler.getDataHandlerForMarker().onLocationChanged(location);
-          //  }
-
-            Location tempLastLocation = mainMixedViewContext.getLocationAtLastDownload();
-            if(tempLastLocation == null) {
-                /*만일 현제 데이터 핸들러 상의 위치정보가 없다면 (오류나 최초실행의 경우)
-                * 현제 위치를 등록해준다.
-                * */
-                mainMixedViewContext.setLocationAtLastDownload(location);
-            }else{
-                float threshold = argumentedDataHandler.getRadius()*1000f/3f;
-                if(location.distanceTo(tempLastLocation)>threshold){
-                    argumentedDataHandler.doStart();
-
-                }
-                /*gps가 현제 사용 가능한 상태라는 것을 알려준다.*/
-                isGpsProviderEnable = true;
-            }
-
-        }
+        }//
+        ///fsdfdf
 
 
-        LocationDataUpdate(location);
+
+     //   LocationDataUpdate(location);
 
 
 
