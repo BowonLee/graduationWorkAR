@@ -69,7 +69,7 @@ import java.util.List;
 /*
 * 지도가 그려져있는 부분이다.
 * */
-public class GoogleMapsViewAcrivity extends FragmentActivity implements OnMapReadyCallback, LocationListener, GoogleMap.OnMarkerClickListener, GoogleApiClient.OnConnectionFailedListener {
+public class GoogleMapsViewAcrivity extends FragmentActivity implements OnMapReadyCallback, LocationListener, GoogleMap.OnMarkerClickListener, GoogleApiClient.OnConnectionFailedListener, View.OnClickListener {
 
 
     /*
@@ -79,6 +79,7 @@ public class GoogleMapsViewAcrivity extends FragmentActivity implements OnMapRea
 
     // 전체적으로 사용할 마커들 - 넓은 반경
     public static List<Marker> markerList;
+    public static List<Marker> persnalMarkerList;
     Marker markerOnMap;
     /*커스텀 마커용 아이템*/
 
@@ -102,7 +103,7 @@ public class GoogleMapsViewAcrivity extends FragmentActivity implements OnMapRea
 
     private GoogleMap mMap;
     Button viewChangeButton;
-    PermissionHelper permissionHelper;
+    Button createMarkerButton;
 
     /*
     * 지도화면 출력 -> 내 위치로 지도화면 이동(map 객체 사용) -> 서버통신 (asynktask)->서버통신 완료시 마커 생성
@@ -118,31 +119,32 @@ public class GoogleMapsViewAcrivity extends FragmentActivity implements OnMapRea
     protected void onCreate(Bundle savedInstanceState) {
 
         markerList = new ArrayList<Marker>();
-
+        persnalMarkerList = new ArrayList<Marker>();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-        permissionHelper = new PermissionHelper(this);
+
        // CameraUpdateFactory.newLatLng();
 
         viewChangeButton = (Button)findViewById(R.id.button_for_changeviewtype_camera);
+        viewChangeButton.setOnClickListener(this);
+        createMarkerButton = (Button)findViewById(R.id.button_for_write_map);
+        createMarkerButton.setOnClickListener(this);
 
-        viewChangeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(GoogleMapsViewAcrivity.  this, MixedViewActivity.class);
-                startActivity(intent);
-            }
-        });
 
         setCustomMarkerView();
 
         mLocationManager = (LocationManager)getSystemService(LOCATION_SERVICE);
         mPermissionHelper = new PermissionHelper(this);
 
+
+        mPermissionHelper.storageReadPerMission();
+        mPermissionHelper.storageWritePerMission();
+        mPermissionHelper.LocationPermission();
+        mPermissionHelper.CameraPermission();
 
         /*
         * mGoogleAPI
@@ -157,7 +159,7 @@ public class GoogleMapsViewAcrivity extends FragmentActivity implements OnMapRea
         super.onResume();
 
         try {
-            permissionHelper.LocationPermission();
+
             Location gps, network;
 
             mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 10, this);
@@ -209,24 +211,19 @@ public class GoogleMapsViewAcrivity extends FragmentActivity implements OnMapRea
         //placePhotosTask();
     }
 
+    private void drawPernalMarkersOnMap(){
 
+    }
 
 
     public void createPlaceMarkers(){
-
-        //markerList.clear();
-
         PendingResult<PlaceLikelihoodBuffer> result = Places.PlaceDetectionApi
                 .getCurrentPlace(mGoogleApiClient, null);
-
-
-
         result.setResultCallback(new ResultCallback<PlaceLikelihoodBuffer>() {
 
 
             @Override
             public void onResult(PlaceLikelihoodBuffer likelyPlaces) {
-
 
                 for (PlaceLikelihood placeLikelihood : likelyPlaces) {
                     markerList.add(
@@ -242,13 +239,8 @@ public class GoogleMapsViewAcrivity extends FragmentActivity implements OnMapRea
             }
 
         });
-
-        /*
-        * phototask 시작
-        * */
-
-
     }
+
 
 
 
@@ -413,6 +405,21 @@ public class GoogleMapsViewAcrivity extends FragmentActivity implements OnMapRea
         }.execute("start");
     }
 
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+
+            case R.id.button_for_changeviewtype_camera : {
+                Intent intent = new Intent(GoogleMapsViewAcrivity.  this, MixedViewActivity.class);
+                startActivity(intent);
+            }break;
+            case R.id.button_for_write_map : {
+                Intent intent = new Intent(GoogleMapsViewAcrivity.  this, CreatePersonalMarkerActivity.class);
+                startActivity(intent);
+
+            }break;
+        }
+    }
 
 
     /*

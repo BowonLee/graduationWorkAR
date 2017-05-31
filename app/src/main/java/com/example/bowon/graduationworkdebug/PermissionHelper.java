@@ -18,8 +18,11 @@ public class PermissionHelper {
 
 
     public static final int LOCATION_ACCESS__FINE = 1; // 위치정보 퍼미션
-    public static final int LOCATION_ACCESS_COARSE = 3;
     public static final int CAMERA_PERMISSION = 2;
+    public static final int LOCATION_ACCESS_COARSE = 3;
+    public static final int READ_EXTERNAL_STORAGE = 4;
+    public static final int WRITE_EXTERNAL_STORAGE = 5;
+
 
     Context currentActivity;
     int permissionCheck;
@@ -29,62 +32,41 @@ public class PermissionHelper {
 
     }
 
-
-
-
+    //외부 저장소 쓰기 퍼미션
+    public void storageWritePerMission(){
+        getPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE,WRITE_EXTERNAL_STORAGE);
+    }
+    //외부 저장소 읽기 퍼미션
+    public void storageReadPerMission(){
+        getPermission(Manifest.permission.READ_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE);
+    }
     //위치정보 퍼미션
-    public boolean LocationPermission() {
-        permissionCheck = ContextCompat.checkSelfPermission(currentActivity, Manifest.permission.ACCESS_FINE_LOCATION);
-        if(permissionCheck != PackageManager.PERMISSION_GRANTED){
-            //권한 없음
-            if(ActivityCompat.shouldShowRequestPermissionRationale((Activity) currentActivity, Manifest.permission.ACCESS_FINE_LOCATION)){
-            }else{
-                ActivityCompat.requestPermissions((Activity) currentActivity,new String[]{Manifest.permission.ACCESS_FINE_LOCATION}
-                        ,LOCATION_ACCESS__FINE);
-            }
-            Log.d("LocationCoarse","apply");
-            return true;
-        }else{
-            Log.d("LocationCoarse","already");
-
-        }
-        return false;
+    public void LocationPermission() {
+        getPermission(Manifest.permission.ACCESS_FINE_LOCATION,LOCATION_ACCESS__FINE);
     }
-
     //카메라 퍼미션
-    public boolean CameraPermission(){
-        permissionCheck = ContextCompat.checkSelfPermission(currentActivity,Manifest.permission.CAMERA);
-        if(permissionCheck != PackageManager.PERMISSION_GRANTED){
-            //권한 없음
-            if(ActivityCompat.shouldShowRequestPermissionRationale((Activity) currentActivity, Manifest.permission.CAMERA)){
-            }else{
-                ActivityCompat.requestPermissions((Activity) currentActivity,new String[]{Manifest.permission.CAMERA},CAMERA_PERMISSION);
-            }
-                Log.d("CameraPermission","apply");
-            return true;
-        }else{
-            Log.d("CameraPermission","already");
-
-        }
-    return false;
+    public void CameraPermission(){
+        getPermission(Manifest.permission.CAMERA,CAMERA_PERMISSION);
     }
 
-    public boolean LocationCoarsePermission() {
-        permissionCheck = ContextCompat.checkSelfPermission(currentActivity, Manifest.permission.ACCESS_COARSE_LOCATION);
+    public void LocationCoarsePermission() {
+        getPermission(Manifest.permission.ACCESS_COARSE_LOCATION,LOCATION_ACCESS_COARSE);
+    }
+
+    private void getPermission(String thisPermission,int permissionCode){
+        permissionCheck = ContextCompat.checkSelfPermission(currentActivity,thisPermission);
         if(permissionCheck != PackageManager.PERMISSION_GRANTED){
             //권한 없음
-            if(ActivityCompat.shouldShowRequestPermissionRationale((Activity) currentActivity, Manifest.permission.ACCESS_COARSE_LOCATION)){
+            if(ActivityCompat.shouldShowRequestPermissionRationale((Activity) currentActivity, thisPermission)){
             }else{
-                ActivityCompat.requestPermissions((Activity) currentActivity,new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}
-                        ,LOCATION_ACCESS_COARSE);
+                ActivityCompat.requestPermissions((Activity) currentActivity,new String[]{thisPermission}
+                        ,permissionCode);
             }
-            Log.d("LocationCoarse","apply");
-            return true;
         }else{
-            Log.d("LocationCoarse","already");
-
         }
-        return false;
+
+
+
     }
 
 

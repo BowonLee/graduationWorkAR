@@ -26,6 +26,7 @@
             android:id="@+id/button_marker_create_complete"
 
             android:layout_marginRight="30sp"
+            android:onClick="onClick"
             />
 
     </LinearLayout>
@@ -45,7 +46,9 @@
             android:id="@+id/imageview_marker_create"
             android:src="@drawable/btn_write_camera"
             android:background="@drawable/boarderline_detail_camera"
-            android:adjustViewBounds="false" />
+            android:adjustViewBounds="false"
+            android:onClick="onClick"
+            />
     </LinearLayout>
 
     <LinearLayout
@@ -59,12 +62,15 @@
             android:gravity="center_vertical"
             android:clickable="false"
             />
-        <TextView
+
+        <EditText
             android:layout_width="wrap_content"
             android:layout_height="60dp"
             android:layout_marginRight="20dp"
-            android:background="@drawable/textarea_write_title"
             android:gravity="center_vertical"
+            android:textSize="20dp"
+            android:textColor="#000000"
+            android:hint="제목을 입력해 주세요"
             android:id="@+id/textview_marker_create_title"
             />
     </LinearLayout>
